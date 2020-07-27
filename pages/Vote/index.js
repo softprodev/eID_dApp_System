@@ -11,7 +11,6 @@ import {Card,Table} from 'react-bootstrap';
 import factory from '../../ethereum/Vote/factory';
 import web3 from '../../ethereum/web3'
 import {Router}from '../../routes';
-import { LoadingOverlay, Loader } from 'react-overlay-loader';
 class Index extends Component {
     constructor(props) {
       super(props);
@@ -29,9 +28,9 @@ class Index extends Component {
         event.preventDefault();
         this.setState({loading:true});
         const accounts = await web3.eth.getAccounts();
-        //console.log(accounts[0]);
+        console.log(accounts[0]);
         const addr =await factory.methods.return_addr(accounts[0]).call();
-        //console.log(addr);
+        console.log(addr);
         if(addr!='0x0000000000000000000000000000000000000000')Router.pushRoute(`/Vote/home/${addr.toString()}`);
         else alert("please create a mailbox first!")
         this.setState({loading:false});
@@ -44,7 +43,7 @@ class Index extends Component {
     async create(event){
       try{
         event.preventDefault();
-        this.setState({loading:true});
+        this.setState({loading2:true});
         var accounts = await web3.eth.getAccounts();
         let addr =await factory.methods.return_addr(accounts[0]).call();
         if(addr!='0x0000000000000000000000000000000000000000')Router.pushRoute(`/Vote/home/${addr}`);
@@ -53,15 +52,14 @@ class Index extends Component {
           let addr =await factory.methods.return_addr(accounts[0]).call();
           if(addr!=null)Router.pushRoute(`/Vote/home/${addr}`);
           else alert("somthing wrong please try again!");
-          this.setState({loading:false});
+          this.setState({loading2:false});
         }
       }
       catch(err){
         alert(err);
-        this.setState({loading:false});
+        this.setState({loading2:false});
       }
     }
-
     render() {
         return(
           <>
