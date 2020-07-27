@@ -12,8 +12,8 @@ import {Card} from 'react-bootstrap';
 import web3 from '../../ethereum/web3'
 import {Router}from '../../routes';
 import vote from '../../ethereum/Vote/vote';
-import registry from '../../ethereum/Vote/registry';
-import CryptoJS from 'crypto-js';
+import registry from '../../ethereum/registry';
+
 const show_btn = function( stage ){
     if (stage != 0 ) return null;
     //console.log(stage);
@@ -28,24 +28,7 @@ class Register_btn extends Component{
         this.state ={
             registry_addr:""
         };
-        this.register = this.register.bind(this);
       }
-      async register(){
-          //0x42309f924237Bac662Af64965A2efAF8c08fE4d2
-        const accounts = await web3.eth.getAccounts();
-        const Vote_event =await vote(this.props.address);
-        let requirements = await Vote_event.methods.requirement().call();
-        console.log(requirements);
-        var hash = CryptoJS.SHA3("human", { outputLength: 256 }).toString();
-        //console.log(web3.utils.fromAscii(hash));
-        try{
-            //await Vote_event.methods.register('0x'+hash,this.state.registry_addr).send({from:accounts[0]});
-            await Vote_event.methods.register(requirements,this.state.registry_addr).send({from:accounts[0]});
-            Router.pushRoute(`/Vote/vote/${this.props.mb_addr}/${this.props.address}`);
-        } catch (err) {
-            alert(err.message);
-        }
-    }
     render(){
     //console.log(this.props.stage );
     if (this.props.stage != 1 ) return null;
@@ -55,46 +38,28 @@ class Register_btn extends Component{
         <FormControl type="text" placeholder="enter your registry number" className="mr-sm-2"
                 value={this.state.registry_addr} 
                 onChange = {event => this.setState({registry_addr:event.target.value})} />
-        <Button variant="outline-info"style={{margin :"2%"}} onClick={this.register}>register</Button>
+        <Button variant="outline-info"style={{margin :"2%"}} onClick={this.props.register(this.state.registry_addr)}>register</Button>
         </>
     );
     }
 };
 class Vote_btn extends Component{
-    constructor(props) {
-        super(props);
-        this.state ={
-            vote_value:0
-        };
-        this.go_vote = this.go_vote.bind(this);
-      }
-    async go_vote(){
-        console.log(this.state.vote_value);
-        const accounts = await web3.eth.getAccounts();
-        const Vote_event =await vote(this.props.address);
-        try{
-            await Vote_event.methods.can_vote(this.state.vote_value).send({from:accounts[0]});
-            Router.pushRoute(`/Vote/vote/${this.props.mb_addr}/${this.props.address}`);
-        } catch (err) {
-            alert(err.message);
-        }
-    }
+//const vote_btn =function (stage ){
     render(){
     if (this.props.stage != 2 ) return null;
   
     return (
         <>
-        <Form style={{width:'33%', margin: 'auto', marginTop : "2%"}} >
+        <Form style={{width:'33%', margin: 'auto', marginTop : "2%"}} onSubmit={this.props.vote}>
         <Form.Group >
-            <Form.Control as="select" size="lg"  onChange = {event => this.setState({vote_value:event.target.value})}>
-                
-                {this.props.ops.map((op, index) => <option value={index}>{op}</option>)}
+            <Form.Control as="select" size="lg">
+                {this.props.ops.map(op => <option>{op}</option>)}
                 {/*<option>Korean Fish</option>
                 <option>Donald Trump</option>
                 <option>Xi DADA</option>*/}
             </Form.Control>
         </Form.Group>
-        <Button variant="outline-info"style={{margin :"2%"}}  onClick={this.go_vote}>Vote</Button>
+        <Button variant="outline-info"style={{margin :"2%"}} type="submit">Vote</Button>
         </Form>
         </>
     );
@@ -116,6 +81,9 @@ class Votesss extends Component {
         };
       //console.log(props.query.address);//擷取這個網址的url那part的address(from routes??)  
       this.refresh_search = this.refresh_search.bind(this);
+      this.register = this.register.bind(this);
+      this.go_vote = this.go_vote.bind(this);
+      //this.see_status = this.see_status(this);
       }
     static async getInitialProps(props){
         const{address, mb_addr} = props.query;
@@ -140,11 +108,20 @@ class Votesss extends Component {
         Router.pushRoute(`/Vote/vote/${this.state.search}`);
         //console.log(this.props.address);
     }
+    async register(registry_addr){
+        //const accounts = await web3.eth.getAccounts();
+        //await this.props.Vote_event.methods.register().send({from:accounts[0]});
+    }
+    async go_vote(){
+        //const accounts = await web3.eth.getAccounts();
+        //await this.props.Vote_event.methods.register().send({from:accounts[0]});
+    }
+   
+
     render() {
         return(
         <>
          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossOrigin="anonymous"/>
-         
          <Container>
          <Navbar bg="dark" variant="dark"style={{width:"100%"}}>
             <Navbar.Brand >Vote</Navbar.Brand>
@@ -156,7 +133,6 @@ class Votesss extends Component {
             
         </Navbar>
         <div style={{width: '100%'}}>
-
         <Form inline style={{ width: '33%' , margin: 'auto' , marginTop : "2%"}}>
             <div style={{color : "black"}} > inesrt your vote contract address here  -&gt;   </div>
             <FormControl type="text" placeholder="Search" className="mr-sm-2"
@@ -167,14 +143,14 @@ class Votesss extends Component {
         <Card style={{ width: '33%' , margin: 'auto' , marginTop : "2%"}}>
             <Card.Body>
                 <Card.Title>Election</Card.Title>
-                <Card.Subtitle className="mb-2 text-muted">voter address : {this.props.address}</Card.Subtitle>
+                <Card.Subtitle className="mb-2 text-muted">voter address : 0xjxijwijswiw</Card.Subtitle>
                 <Card.Text>
                     View the latest 2020 presidential polls and head-to-head match-up between Joe Biden and Donald Trump. For more information, view cnn.com/election.
                 </Card.Text>
                 <Card.Text>{this.props.stage_str}</Card.Text>
                 {show_btn(this.props.stage)}
-                <Register_btn stage ={this.props.stage} address = {this.props.address} mb_addr={this.props.mb_addr}></Register_btn>
-                <Vote_btn stage ={this.props.stage} ops = {this.props.options} address = {this.props.address} mb_addr={this.props.mb_addr}></Vote_btn>
+                <Register_btn stage ={this.props.stage} register = {this.register}></Register_btn>
+                <Vote_btn stage ={this.props.stage} vote = {this.go_vote} ops = {this.props.options}></Vote_btn>
             </Card.Body>
         </Card>
         </div>

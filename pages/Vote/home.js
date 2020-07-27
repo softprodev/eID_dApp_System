@@ -22,9 +22,9 @@ class Join extends Component {
         <>
           <td>{this.props.joins[0]}</td>
           <td>{this.props.joins[1]}</td>
-          <td><Link route={"/Vote/vote/"+this.props.mb_addr+"/"+this.props.joins[2]} ><a>{this.props.joins[2]}</a></Link></td>
+          <td><Link route={"/Vote/vote/"+this.props.mb_addr+"/"+this.props.joins[2]} >{this.props.joins[2]}</Link></td>
           <td>{this.props.joins[3]}</td>
-          <td><Link route={"/Vote/status/"+this.props.mb_addr+"/"+this.props.joins[4]} ><a>link</a></Link></td>
+          <td><Link route={"/Vote/status/"+this.props.mb_addr+"/"+this.props.joins[4]} >link</Link></td>
         </>
       );
     }
@@ -34,7 +34,7 @@ class Join_list extends Component{
       render(){
       return (
           <>
-          {this.props.list.map(key => <tr><Join joins={key} mb_addr={this.props.mb_addr}></Join></tr>)}
+          {this.props.list.map(join => <tr><Join joins={join} mb_addr={this.props.mb_addr}></Join></tr>)}
           </>
       );
       }
@@ -51,31 +51,13 @@ class Self extends Component {
         const accounts = await web3.eth.getAccounts();
         const Vote_event =await vote(v_address);
         if(current_stage == 0){//set up
-          try{
           await Vote_event.methods.set_can_register().send({from:accounts[0]});
-            Router.pushRoute(`/Vote/home/${this.props.mb_addr}`);
-          }
-          catch(err){
-            alert(err);
-          }
         }
         else if(current_stage == 1){//registry
-          try{
-            await Vote_event.methods.set_can_vote().send({from:accounts[0]});
-              Router.pushRoute(`/Vote/home/${this.props.mb_addr}`);
-            }
-            catch(err){
-              alert(err);
-            }
+          await Vote_event.methods.set_can_vote().send({from:accounts[0]});
         }
         else if(current_stage == 2){//vote
-          try{
-            await Vote_event.methods.set_can_tally().send({from:accounts[0]});
-              Router.pushRoute(`/Vote/home/${this.props.mb_addr}`);
-            }
-            catch(err){
-              alert(err);
-            }
+          await Vote_event.methods.set_can_tally().send({from:accounts[0]});
         }
         else {//tally and finish
           alert("current stage don't need other setting")
@@ -87,7 +69,7 @@ class Self extends Component {
         <>  
           <td>{this.props.selfs[0]}</td>
           <td>{this.props.selfs[1]}</td>
-          <td><Link route={"/Vote/vote/"+this.props.mb_addr+"/"+this.props.selfs[2]} ><a>{this.props.selfs[2]}</a></Link></td>
+          <td><Link route={"/Vote/vote/"+this.props.mb_addr+"/"+this.props.selfs[2]} >{this.props.selfs[2]}</Link></td>
           <td>{this.props.selfs[3]}</td>
           <td><Button variant="primary" 
             onClick={this.next}>
@@ -96,8 +78,8 @@ class Self extends Component {
                (this.props.selfs[4] == 2)?"Set Tally":
                (this.props.selfs[4] == 3)?"Setting finish":
                "Finish"}</Button></td>
-          <td><Link route={"/Vote/status/"+this.props.mb_addr+"/"+this.props.selfs[2]} ><a>link</a></Link></td>
-          <td><Link route={"/Vote/admin/"+this.props.mb_addr+"/"+this.props.selfs[2]} ><a>link</a></Link></td>
+          <td><Link route={"/Vote/status/"+this.props.mb_addr+"/"+this.props.selfs[2]} >link</Link></td>
+          <td><Link route={"/Vote/admin/"+this.props.mb_addr+"/"+this.props.selfs[2]} >link</Link></td>
         </>
       );
     }
@@ -178,32 +160,19 @@ class Home extends Component {
     async create_vote(){
         const accounts = await web3.eth.getAccounts();
         const Mailbox =await mailbox(this.props.mb_addr);
-        
-        try{
-            await Mailbox.methods.create_vote().send({from:accounts[0]});
-            Router.pushRoute(`/Vote/home/${this.props.mb_addr}`);
-          }
-          catch(err){
-            alert(err);
-          }
+        await Mailbox.methods.create_vote().send({from:accounts[0]});
     }
     async add_list(){
       const accounts = await web3.eth.getAccounts();
       const Mailbox =await mailbox(this.props.mb_addr);
-      try{
-        await Mailbox.methods.add_to_join_list(this.state.addr).send({from:accounts[0]});
-        Router.pushRoute(`/Vote/home/${this.props.mb_addr}`);
-      }
-      catch(err){
-        alert(err);
-      }
+      await Mailbox.methods.add_to_join_list(this.state.addr).send({from:accounts[0]});
     }
     render() {
       
         return(
           <>
           <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossOrigin="anonymous"/>
-          <Container >
+          <Container>
           <Navbar bg="dark" variant="dark"style={{width:"100%"}}>
              <Navbar.Brand >Vote</Navbar.Brand>
               <Nav className="mr-auto" style={{width:"50%"}}>

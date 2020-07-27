@@ -33,12 +33,12 @@ class Index extends Component {
         return(
           <>
           <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossOrigin="anonymous"/>
-          
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/crypto-js.js"></script>
           <Container>
           <Navbar bg="dark" variant="dark"style={{width:"100%"}}>
-             <Navbar.Brand >Dapp</Navbar.Brand>
+             <Navbar.Brand ><Link route="/vote/0x4CbCE152A771B089d1d82DccCA01253430194b10" ><a style={{color: "white", width:"100px"}}>Vote</a></Link></Navbar.Brand>
               <Nav className="mr-auto" style={{width:"50%" ,color:"white"}}>
-                 Welcome to the Dapp website!
+                 Welcome to the vote website!
               </Nav>
          </Navbar>
          
