@@ -36,9 +36,9 @@ class Index extends Component {
           
           <Container>
           <Navbar bg="dark" variant="dark"style={{width:"100%"}}>
-             <Navbar.Brand >Dapp</Navbar.Brand>
+             <Navbar.Brand >E-Identity</Navbar.Brand>
               <Nav className="mr-auto" style={{width:"50%" ,color:"white"}}>
-                 Welcome to the Dapp website!
+                 Welcome to the EID website!
               </Nav>
          </Navbar>
          
