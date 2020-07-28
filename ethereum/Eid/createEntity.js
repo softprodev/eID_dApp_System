@@ -1,9 +1,9 @@
 import web3 from '../web3';
-import CreateEntity from './build/CreateEntity.json';
+import BallotCreator from './build/BallotCreator.json';
 
 const instance = new web3.eth.Contract(
-    CreateEntity.abi,
-    '0x07c52E5452F3115465916B7D8001d731D7eC8A19'
+    BallotCreator.abi,
+    '0xf874FDA8283e81c11a62a27506353095BE26895A'
 );
 
 export default instance;
