@@ -50,7 +50,6 @@ class Self extends Component {
         const v_address = this.props.selfs[2];
         const accounts = await web3.eth.getAccounts();
         const Vote_event =await vote(v_address);
-        /*
         if(current_stage == 0){//set up
           try{
           await Vote_event.methods.set_can_register().send({from:accounts[0]});
@@ -60,8 +59,7 @@ class Self extends Component {
             alert(err);
           }
         }
-        else*/ 
-        if(current_stage == 0){//registry
+        else if(current_stage == 1){//registry
           try{
             await Vote_event.methods.set_can_vote().send({from:accounts[0]});
               Router.pushRoute(`/Vote/home/${this.props.mb_addr}`);
@@ -70,7 +68,7 @@ class Self extends Component {
               alert(err);
             }
         }
-        else if(current_stage == 1){//vote
+        else if(current_stage == 2){//vote
           try{
             await Vote_event.methods.set_can_tally().send({from:accounts[0]});
               Router.pushRoute(`/Vote/home/${this.props.mb_addr}`);
@@ -93,10 +91,10 @@ class Self extends Component {
           <td>{this.props.selfs[3]}</td>
           <td><Button variant="primary" 
             onClick={this.next}>
-              {//(this.props.selfs[4] == 0)?"Set Register":
-               (this.props.selfs[4] == 0)?"Set Vote":
-               (this.props.selfs[4] == 1)?"Set Tally":
-               (this.props.selfs[4] == 2)?"Setting finish":
+              {(this.props.selfs[4] == 0)?"Set Register":
+               (this.props.selfs[4] == 1)?"Set Vote":
+               (this.props.selfs[4] == 2)?"Set Tally":
+               (this.props.selfs[4] == 3)?"Setting finish":
                "Finish"}</Button></td>
           <td><Link route={"/Vote/status/"+this.props.mb_addr+"/"+this.props.selfs[2]} ><a>link</a></Link></td>
           <td><Link route={"/Vote/admin/"+this.props.mb_addr+"/"+this.props.selfs[2]} ><a>link</a></Link></td>
