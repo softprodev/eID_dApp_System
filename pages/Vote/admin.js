@@ -8,7 +8,7 @@ import Form from 'react-bootstrap/Form';
 import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 import DatePicker from "react-datepicker";
-import {Card,Table,Spinner} from 'react-bootstrap';
+import {Card,Table} from 'react-bootstrap';
 import web3 from '../../ethereum/web3'
 import {Router}from '../../routes';
 import vote from '../../ethereum/Vote/vote';
@@ -108,7 +108,7 @@ class Admin extends Component {
         }catch(err){
             alert(err);
         }
-        this.setState({loading2:false});
+        this.setState({loading:false});
     }
     refresh_search(){
         if(this.state.search != ""){
@@ -202,19 +202,7 @@ class Admin extends Component {
             </Form.Row>
 
             <Button variant="primary" type="submit">
-            {(this.state.loading)?
-                  <>
-                  <Spinner
-                    as="span"
-                    animation="grow"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  Loading
-                  </>
-                  :
-                  <>Setting</>}
+                Setting
             </Button>
         </Form>
         
@@ -249,20 +237,7 @@ class Admin extends Component {
                 </Form.Group>
             </Form.Row>
             <Button variant="primary" type="submit" >
-                {(this.state.loading2)?
-                  <>
-                  <Spinner
-                    as="span"
-                    animation="grow"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                  />
-                  Loading
-                  </>
-                  :
-                  <>Set options</>}
-                
+                Set options
             </Button>
             </Form>
             </div>
