@@ -46,19 +46,6 @@ class CertificateIndex extends Component {
       that.setState({ hashValue: hash });
       console.log("hashing value: ", that.state.hashValue);
     };
-    // build json
-    // const buildPath = path.resolve(__dirname, 'build');
-
-    // // const source = fs.readFileSync(jsonData, 'utf8');
-    // // const output = solc.compile(source, 1).contracts;
-
-    // fs.ensureDirSync(buildPath);
-
-    // //console.log(output);
-    // fs.outputJsonSync(
-    //   path.resolve(buildPath, 'certificate.json'),
-    //   jsonData
-    //   );
   };
 
   fileData = () => {
@@ -102,6 +89,10 @@ class CertificateIndex extends Component {
     return (
       <Layout>
         <h1>Verify Certificates</h1>
+        <Link route={"/Academic/getRegistry/index"}>
+          <a>back</a>
+        </Link>
+        <br /><br />
         <Form error={!!this.state.errorMessage}>
           <h3>Choose a JSON file</h3>
           <input

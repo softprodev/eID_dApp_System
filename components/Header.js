@@ -5,8 +5,12 @@ import { Link } from '../routes';
 export default () => {
   return (
     <Menu style={{ marginTop: '10px' }}>
-      <Link route="/Academic/index">
+      <Menu.Menu position="left">
         <a className="item">Academic Credential</a>
+      </Menu.Menu>
+
+      <Link route="/Academic/getRegistry/index">
+        <a className="item">Verify Mode</a>
       </Link>
 
       <Link route="/Academic/school/index">
