@@ -4,44 +4,50 @@ import Layout from '../../../components/EidUserLayout';
 import web3 from '../../../ethereum/web3';
 import { Router, Link } from '../../../routes';
 
-class ReceiveHomePage extends Component {
-    state = {
-        addr: '',
-        errorMessage: ''
+class Receive extends Component {
+  state = {
+    loading: false,
+    errorMessage: ''
+  };
+
+  onSubmit = async (event) => {
+    event.preventDefault();
+
+    this.setState({ loading: true, errorMessage: '' });
+    try {
+      const accounts = await web3.eth.getAccounts();
+    } catch (err) {
+      this.setState({ errorMessage: err.message });
     }
 
-    onSubmit = async (event) => {
-        event.preventDefault();
+    this.setState({ loading: false });
+  };
 
-        if(this.state.addr!='0x0000000000000000000000000000000000000000')
-            Router.pushRoute(`/Eid/receivePage/${this.state.addr.toString()}`);
-    
-        
-    };
+  render() {
+    const { Header, Row, HeaderCell, Body } = Table;
 
-    render() {
-        return(
-            <Layout>
-                <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage} >
-                    <Form.Field>
-                        <label>Go to your entity</label>
-                        <Input
-                            label={{ basic: true, content: 'string' }}
-                            labelPosition='right'
-                            placeholder=''
-                            value={this.state.addr}
-                            onChange={event => this.setState({ addr: event.target.value })}
-                        />
 
-                    </Form.Field>
-
-                    <Message error header="Oops!" content={this.state.errorMessage} />
-                    <Button primary>Go!</Button>
-                </Form>
-            </Layout>
-
-        )
-    }
+    return (
+      <Layout>
+        <h1>Receive Data from Registry!</h1>
+        <br />
+        <Table>
+          <Header>
+            <Row>
+              <HeaderCell>Destination</HeaderCell>
+              <HeaderCell>Description</HeaderCell>
+              <HeaderCell>Key</HeaderCell>
+              <HeaderCell>Value</HeaderCell>
+              <HeaderCell>Status</HeaderCell>
+            </Row>
+          </Header>
+          <Body>
+            {/* {this.renderRows()} */}
+          </Body>
+        </Table>
+      </Layout>
+    );
+  }
 }
 
-export default ReceiveHomePage;
+export default Receive;

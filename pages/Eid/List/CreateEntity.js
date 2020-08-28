@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Form, Button, Input, Message } from 'semantic-ui-react';
 import Layout from '../../../components/EidLayout';
-import MultipleEntityFactory from '../../../ethereum/Eid/MultipleEntityFactory';
+import createEntity from '../../../ethereum/Eid/createEntity';
 import web3 from '../../../ethereum/web3';
 import { Router } from '../../../routes';
 
-class CreateMultipleEntity extends Component {
+class CreateEntity extends Component {
   state = {
     description: '',
     EOAaddr: ''
@@ -16,13 +16,11 @@ class CreateMultipleEntity extends Component {
   onSubmit = async (event) => {
     event.preventDefault();
 
-    let address=[];
     let { description, EOAaddr } = this.state;
     this.setState({ loading: true, errorMessage: '' });
     try {
       const accounts = await web3.eth.getAccounts();
-      address = EOAaddr.replace(" ","").split(",");
-      await MultipleEntityFactory.methods.create(description, address)
+      await createEntity.methods.create(description, EOAaddr)
         .send({
           from: accounts[0]
         });
@@ -38,7 +36,7 @@ class CreateMultipleEntity extends Component {
   render() {
     return (
       <Layout>
-        <h1>Create a Multiple-controlled Entity</h1>
+        <h1>Create an entity!</h1>
         <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage} >
           <Form.Field>
             <label>Entity Description</label>
@@ -49,11 +47,11 @@ class CreateMultipleEntity extends Component {
               value={this.state.description}
               onChange={event => this.setState({ description: event.target.value })}
             />
-            <label>Entities to control this entity</label>
+            <label>EOA to bind with this entity</label>
             <Input
               label={{ basic: true, content: 'address' }}
               labelPosition='right'
-              placeholder='Enter valid array of single-controlled entity address 0x...., 0x... , ..., 0x...]'
+              placeholder='enter valid address 0x....'
               value={this.state.EOAaddr}
               onChange={event => this.setState({ EOAaddr: event.target.value })}
             />
@@ -68,4 +66,4 @@ class CreateMultipleEntity extends Component {
   }
 }
 
-export default CreateMultipleEntity;
+export default CreateEntity;

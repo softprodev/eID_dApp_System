@@ -23,8 +23,4 @@ contract MultipleEntityFactory {
         return Array.length;
     }
 
-    function loadSource(uint index) public view returns(address[] memory){
-        return Array[index].source;
-    }
-
 }

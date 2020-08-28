@@ -30,7 +30,7 @@ class Index extends Component {
     Router.pushRoute(`/Eid/sendPage/index`);
   }
   async goList(event) {
-    Router.pushRoute(`/Eid/List`);
+    Router.pushRoute(`/Eid/List/List`);
   }
   render() {
     return (
