@@ -22,10 +22,10 @@ class Index extends Component {
     Router.pushRoute(`/Academic/verifyPage/index`);
   }
   async goSchool(event) {
-    Router.pushRoute(`/Academic/school/login`);
+    Router.pushRoute(`/Academic/school/index`);
   }
   async goMinistry(event) {
-    Router.pushRoute(`/Academic/ministry/login`);
+    Router.pushRoute(`/Academic/ministry/index`);
   }
   render() {
     return (
