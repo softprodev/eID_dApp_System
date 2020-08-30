@@ -1,26 +1,16 @@
 import React, { Component } from 'react';
-import { Card } from 'semantic-ui-react';
+import { Button, Card } from 'semantic-ui-react';
 import Layout from '../../../components/Layout';
 import verify from '../../../ethereum/academic/verify';
 import { Link } from '../../../routes';
-import web3 from '../../../ethereum/academic/web3';
 
 class StudentPage extends Component {
-  
   static async getInitialProps() {
-    const accounts = await web3.eth.getAccounts();
-    const certCount = await verify.methods.getDeployedCerts(accounts[0]).call();
-    const studentList = await verify.methods.getStudentList(accounts[0]).call();
+    const certCount = await verify.methods.getDeployedCerts().call();
 
-    // const certificates = await Promise.all(
-    //   Array(parseInt(certCount)).fill().map((element, index) => {
-    //     return verify.methods.certificates(index).call();
-    //   })
-    // );
-    
     const certificates = await Promise.all(
       Array(parseInt(certCount)).fill().map((element, index) => {
-        return verify.methods.schoolOwnedCert(accounts[0], studentList[index]).call();
+        return verify.methods.certificates(index).call();
       })
     );
 
@@ -33,7 +23,7 @@ class StudentPage extends Component {
         header: certificate.name,
         description: (
           <Link route={`/Academic/certificates/${certificate.certHash}/success`}>
-            <a>Download from IPFS</a>
+            <a>View Certificate</a>
           </Link>
         ),
         meta: certificate.studentAddr,

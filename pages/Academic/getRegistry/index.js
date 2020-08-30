@@ -5,11 +5,11 @@ import Layout from '../../../components/Layout';
 import web3 from '../../../ethereum/academic/web3';
 import verify from '../../../ethereum/academic/verify';
 
-class AddIndex extends Component {
+class getIndex extends Component {
   state = {
     selectedFile: null,
-    newSchoolAddr: '',
-    newSchoolName: '',
+    studentEntity: '',
+    contractAddress: '',
     errorMessage: '',
     loading: false
   };
@@ -20,9 +20,9 @@ class AddIndex extends Component {
     this.setState({ loading: true, errorMessage: '' });
     try {
       const accounts = await web3.eth.getAccounts();
-      await verify.methods
-        .addNewSchool(this.state.newSchoolAddr, this.state.newSchoolName)
-        .send({ from: accounts[0] });
+      //   await verify.methods
+      //     .addNewSchool(this.state.studentEntity, this.state.contractAddress)
+      //     .send({ from: accounts[0] });
 
       Router.pushRoute(`/Academic/ministry/schoolList`);
     } catch (err) {
@@ -35,12 +35,12 @@ class AddIndex extends Component {
   render() {
     return (
       <Layout>
-        <h1>Add new school</h1>
-        <Link route="/Academic/ministry/schoolList">
+        <h1>Get IPFS</h1>
+        <Link route="/Academic/index">
           <a>
             <Button
               floated="right"
-              content='View All Schools'
+              content='Verify Certificate'
               primary={true}
             />
           </a>
@@ -48,28 +48,36 @@ class AddIndex extends Component {
         <br />
         <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
           <Form.Field>
-            <h3>School Entity Address</h3>
+            <h3>Student Entity Address</h3>
             <Input
-              value={this.state.newSchoolAddr}
+              value={this.state.studentEntity}
               onChange={event =>
-                this.setState({ newSchoolAddr: event.target.value })}
-            />
-          </Form.Field>
-          
-          <Form.Field>
-            <h3>School Name</h3>
-            <Input
-              value={this.state.newSchoolName}
-              onChange={event =>
-                this.setState({ newSchoolName: event.target.value })}
+                this.setState({ studentEntity: event.target.value })}
             />
           </Form.Field>
 
+          <Form.Field>
+            <h3>Contract Address</h3>
+            <Input
+              value={this.state.contractAddress}
+              onChange={event =>
+                this.setState({ contractAddress: event.target.value })}
+            />
+          </Form.Field>
+          
           <a>
             <Button
               loading={this.state.loading}
-              content='Add'
-              icon='add'
+              content='Verify Deployer'
+              icon='check circle outline'
+              primary={true}
+            />
+          </a>
+          <a>
+            <Button
+              loading={this.state.loading}
+              content='Get Certificate'
+              icon='cloud download'
               primary={true}
             />
           </a>
@@ -80,4 +88,4 @@ class AddIndex extends Component {
   }
 }
 
-export default AddIndex;
+export default getIndex;
