@@ -4,6 +4,7 @@ import { Link, Router } from '../../../routes';
 import Layout from '../../../components/Layout';
 import web3 from '../../../ethereum/academic/web3';
 import verify from '../../../ethereum/academic/verify';
+import Entity from '../../../ethereum/eid/build/Entity.json'
 
 class AddIndex extends Component {
   state = {
@@ -20,6 +21,30 @@ class AddIndex extends Component {
     this.setState({ loading: true, errorMessage: '' });
     try {
       const accounts = await web3.eth.getAccounts();
+
+      // in Entity
+      const user = await verify.methods.getUserEntity().call();
+      console.log(user);
+      const entityMinistry = new web3.eth.Contract(Entity.abi, '0xC3771E2E09068470a33f2794D06Ae4A3272b6136');
+      console.log(entityMinistry);
+      await entityMinistry.methods
+        .newDataToSend(this.state.newSchoolAddr, "schoolCertificate")
+        .send({ from: accounts[0] });
+      
+      const index = await entityMinistry.methods
+        .recentSendingIndex(this.state.newSchoolAddr)
+        .call();
+      //console.log(index);
+
+      await entityMinistry.methods
+        .addDataToSend("isSchool", "Yes", index)
+        .send({ from: accounts[0] });
+
+      await entityMinistry.methods
+        .approveDataToSend(index)
+        .send({ from: accounts[0] });
+
+      // in Verify
       await verify.methods
         .addNewSchool(this.state.newSchoolAddr, this.state.newSchoolName)
         .send({ from: accounts[0] });
@@ -50,6 +75,7 @@ class AddIndex extends Component {
           <Form.Field>
             <h3>School Entity Address</h3>
             <Input
+              placeholder='the school entity address (0x...)'
               value={this.state.newSchoolAddr}
               onChange={event =>
                 this.setState({ newSchoolAddr: event.target.value })}
@@ -59,9 +85,11 @@ class AddIndex extends Component {
           <Form.Field>
             <h3>School Name</h3>
             <Input
+              placeholder='the school name'
               value={this.state.newSchoolName}
               onChange={event =>
                 this.setState({ newSchoolName: event.target.value })}
+              style={{ marginBottom: 10 }}
             />
           </Form.Field>
 

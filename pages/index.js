@@ -26,14 +26,13 @@ class Index extends Component {
     this.goEid = this.goEid.bind(this);
   }
   async goVote(event) {
-    const accounts = await web3.eth.getAccounts();
-    Router.pushRoute(`/Vote/home/${accounts[0]}`);
+    Router.pushRoute(`/Vote/index`);
   }
   async goAcademic(event) {
-    Router.pushRoute(`/Academic/getRegistry/index`);
+    Router.pushRoute(`/Academic/index`);
   }
   async goEid(event) {
-    Router.pushRoute(`/Eid/List`);
+    Router.pushRoute(`/Eid/index`);
   }
   render() {
     return (
