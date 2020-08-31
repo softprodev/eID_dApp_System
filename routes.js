@@ -18,17 +18,14 @@ routes.add('/index', '/')
       .add('/Academic/ministry/schoolList', '/Academic/ministry/schoolList')
       .add('/Academic/verify/index', '/Academic/VerifyPage/index')
       .add('/Academic/verify/verifyCertificate', '/Academic/VerifyPage/verifyCert')
-
-      .add('/dNews/index', '/dNews/index')
-      
-
       .add('/Eid/List','/Eid/List/index')
       .add('/Eid/CreateEntity', '/Eid/CreateEntity')
       .add('/Eid/enter', '/Eid/index')
-      .add('/Eid/storage', '/Eid/storage')
+      .add('/Eid/storage/index', '/Eid/storage/index')
+      .add('/Eid/storage/:address', '/Eid/storage/storage')
       .add('/Eid/sendPage/index', '/Eid/sendPage/index')
-      .add('/Eid/sendPage/edit', '/Eid/sendPage/edit')
-      .add('/Eid/sendPage/:address', '/Eid/receivePage/show')
+      .add('/Eid/sendPage/:address', '/Eid/sendPage/show')
+      .add('/Eid/sendPage/:address/:index/edit', '/Eid/sendPage/edit')
       .add('/Eid/receivePage/index', '/Eid/receivePage/index')
       .add('/Eid/receivePage/:address', '/Eid/receivePage/show');
 module.exports = routes;
