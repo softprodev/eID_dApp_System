@@ -26,7 +26,7 @@ class SendHomePage extends Component {
                     <Form.Field>
                         <label>Go to your entity</label>
                         <Input
-                            label={{ basic: true, content: 'address' }}
+                            label={{ basic: true, content: 'string' }}
                             labelPosition='right'
                             placeholder=''
                             value={this.state.addr}
