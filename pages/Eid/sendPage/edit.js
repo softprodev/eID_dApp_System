@@ -97,6 +97,10 @@ class Edit extends Component {
     this.setState({ loading: false });
   };
 
+  Back = () => {
+    Router.pushRoute(`/Eid/sendPage/${this.props.certainData[6]}`);
+  }
+
   render() {
     const { Header, Row, HeaderCell, Body } = Table;
 
@@ -105,8 +109,7 @@ class Edit extends Component {
       <Layout>
         <a>
           <Button
-            onClick={() => {
-              Router.pushRoute(`/Eid/sendPage/${this.props.certainData[6]}`);}}
+            onClick={this.Back}
             content='Back'
           />
         </a>
