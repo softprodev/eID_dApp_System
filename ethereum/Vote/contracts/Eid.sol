@@ -17,6 +17,8 @@ contract Entity {
         bool approved;
     }
 
+
+    
     modifier accessGranted virtual {
         _;
     }
@@ -27,11 +29,13 @@ contract Entity {
     
     //Identifier
     bool constant public isEntity = true;
-    bool isSingle = true;
+    bool public isSingle;
+    mapping(address=>uint) public recentSendingIndex;
     
     //Storage Variables
     mapping(address=>mapping(string=>storingData)) public Storage;
     address[] public dataSource;
+    mapping(address=>bool) public hasWritten;
     mapping(address=>string[]) public descriptionsBySource; 
     
     //Receiving Data Variables
@@ -73,7 +77,10 @@ contract Entity {
                 ", ",
                 pendingDataToReceive[index].key[i]));
         }
-        dataSource.push(pendingDataToReceive[index].source);
+        if(!hasWritten[pendingDataToReceive[index].source]){
+            dataSource.push(pendingDataToReceive[index].source);
+            hasWritten[pendingDataToReceive[index].source] = true;
+        }
         descriptionsBySource[pendingDataToReceive[index].source].push(pendingDataToReceive[index].description);
         pendingDataToReceive[index].approved = true;
     }
@@ -124,14 +131,13 @@ contract Entity {
     function newDataToSend(address _receiver, string memory _description) 
         accessGranted
         public 
-        returns(uint256) 
     {
         pendingData memory newData;
         newData.destination = _receiver;
         newData.description = _description;
         newData.approved = false;
         pendingDataToSend.push(newData);
-        return pendingDataToSend.length - 1;
+        recentSendingIndex[_receiver] = pendingDataToSend.length - 1;
     }
     
     function newDataMultipleToSend(address multipleEntity, address _receiver, string memory _description)
@@ -169,6 +175,7 @@ contract Entity {
         for(uint8 i=0; i<pendingDataToSend[index].key.length; i++){
             receiver._receiveData(pendingDataToSend[index].key[i], pendingDataToSend[index].value[i], idx);
         }
+        pendingDataToSend[index].approved = true;
     }
     
     function approveMultipleToSend(address multipleEntity, uint256 index)
@@ -203,11 +210,44 @@ contract Entity {
         return (pendingDataToSend[index].key[keyIndex], pendingDataToSend[index].value[keyIndex]);
     }
     
+    //Storage function
     function columnValue(address _address, string memory _description, string memory _key) 
         public 
         view 
         returns(string memory)
     {
         return Storage[_address][_description].column[_key];
+    }
+
+    function sourceLength()
+        public
+        view
+        returns(uint)
+    {
+        return dataSource.length;
+    }
+
+    function descriptionLength(address source)
+        public
+        view
+        returns(uint)
+    {
+        return descriptionsBySource[source].length;
+    }
+
+    function keysOfData(address src, string memory des)
+        public
+        view
+        returns(string memory)
+    {
+        return Storage[src][des].keys;
+    }
+
+    function fetchValue(address src, string memory des, string memory key)
+        public
+        view
+        returns(string memory)
+    {
+        return Storage[src][des].column[key];
     }
 }

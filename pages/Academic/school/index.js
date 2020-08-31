@@ -68,16 +68,18 @@ class UploadIndex extends Component {
     try {
       const accounts = await web3.eth.getAccounts();
 
-      // in Entity
+      // in Verify
+      await verify.methods
+        .upload(this.state.hashValue, this.state.studentEntity, 
+                this.state.studentName, this.state.studentGraduate)
+        .send({ from: accounts[0] });
       const user = await verify.methods.getUserEntity().call();
+
+      // in Entity
       const entitySchool = await new web3.eth.Contract(Entity.abi, user);
-      await entitySchool.methods
+      const index = await entitySchool.methods
         .newDataToSend(this.state.studentEntity, "diploma")
         .send({ from: accounts[0] });
-
-      const index = await entitySchool.methods
-        .recentSendingIndex(this.state.studentEntity)
-        .call();
 
       await entitySchool.methods
         .addDataToSend("IPFS hash", this.state.hashValue, index)
@@ -90,12 +92,6 @@ class UploadIndex extends Component {
       await entitySchool.methods
         .approveDataToSend(index)
         .send({ from: accounts[0] });
-
-      // in Verify
-      await verify.methods
-      .upload(this.state.hashValue, this.state.studentEntity, 
-              this.state.studentName, this.state.studentGraduate)
-      .send({ from: accounts[0] });
 
       Router.pushRoute(`/Academic/school/students`);
     } catch (err) {
