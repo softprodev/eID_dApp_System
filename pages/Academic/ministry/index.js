@@ -4,7 +4,7 @@ import { Link, Router } from '../../../routes';
 import Layout from '../../../components/Layout';
 import web3 from '../../../ethereum/academic/web3';
 import verify from '../../../ethereum/academic/verify';
-import Entity from '../../../ethereum/academic/build/Entity.json'
+import Entity from '../../../ethereum/eid/build/Entity.json'
 
 class AddIndex extends Component {
   state = {
@@ -12,8 +12,16 @@ class AddIndex extends Component {
     newSchoolAddr: '',
     newSchoolName: '',
     errorMessage: '',
+    controlAddr: '',
+    ministryAddr: '',
     loading: false
   };
+
+  static async getInitialProps(props) {
+    const { address } = props.query;
+
+    return { address };
+  }
 
   onSubmit = async event => {
     event.preventDefault();
@@ -22,33 +30,37 @@ class AddIndex extends Component {
     try {
       const accounts = await web3.eth.getAccounts();
 
-      // in Verify
-      /*await verify.methods
-        .addNewSchool(this.state.newSchoolAddr, this.state.newSchoolName)
-        .send({ from: accounts[0] });*/
-      const user = await verify.methods.getUserEntity().call();
-      console.log(user);
-
       // in Entity
-      const entityMinistry = await new web3.eth.Contract(Entity.abi, '0x700F90df150aea12F3f6ACfd4Ed94956cd0E8227');
-      console.log(entityMinistry);
-      const index = await entityMinistry.methods
+      this.setState({ ministryAddr: '0x9F54e2c49f5E61711BA6D4263c54b3eD8B25402c' }); 
+      const access = await new web3.eth.Contract(Entity.abi, this.state.controlAddr);
+      const entityMinistry = new web3.eth.Contract(Entity.abi, this.props.address);
+
+      await access.methods
         .newDataToSend(this.state.newSchoolAddr, "schoolCertificate")
         .send({ from: accounts[0] });
+      
+      const index = await entityMinistry.methods
+        .recentSendingIndex(this.state.newSchoolAddr)
+        .call();
+      //console.log(index);
 
-      await entityMinistry.methods
+      await access.methods
         .addDataToSend("isSchool", "Yes", index)
         .send({ from: accounts[0] });
 
-      await entityMinistry.methods
+      await access.methods
         .approveDataToSend(index)
+        .send({ from: accounts[0] });
+
+      // in Verify
+      await verify.methods
+        .addNewSchool(this.state.newSchoolAddr, this.state.newSchoolName)
         .send({ from: accounts[0] });
 
       Router.pushRoute(`/Academic/ministry/schoolList`);
     } catch (err) {
       this.setState({ errorMessage: err.message });
     }
-
     this.setState({ loading: false });
   };
 
@@ -67,6 +79,15 @@ class AddIndex extends Component {
         </Link>
         <br />
         <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
+          <Form.Field>
+            <h3>Entity to Control</h3>
+            <Input
+              placeholder='your entity address (0x...)'
+              value={this.state.controlAddr}
+              onChange={event =>
+                this.setState({ controlAddr: event.target.value })}
+            />
+          </Form.Field>
           <Form.Field>
             <h3>School Entity Address</h3>
             <Input

@@ -4,7 +4,7 @@ import Verify from './build/Verify.json';
 const instance = new web3.eth.Contract(
     //JSON.parse(Verify.interface),
     Verify.abi,
-    '0xC71e1547613c30cAB80F0f351a679f31dd83979A'
+    '0xE85d317489947d0E2AcA866e9e495bCD36259F18'
 );
 
 export default instance;
