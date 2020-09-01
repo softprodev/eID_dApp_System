@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { Button, Form, Input, Message } from 'semantic-ui-react';
 import { Router } from '../../../routes';
-import Layout from '../../../components/Layout';
-import web3 from '../../../ethereum/academic/web3';
-import verify from '../../../ethereum/academic/verify';
+import Layout from '../../../components/Layout_dNews';
+//import web3 from '../../../ethereum/??/web3';
+//import name from '../../../ethereum/dNews/';
 
 class Login extends Component {
   state = {
-    schoolAddr: '',
+    mediaAddr: '',
     errorMessage: '',
     loading: false
   };
@@ -18,15 +18,15 @@ class Login extends Component {
     this.setState({ loading: true, errorMessage: '' });
     try {
       const accounts = await web3.eth.getAccounts();
-      await verify.methods.verifyIsSchool(this.state.schoolAddr).send({ from: accounts[0] })
+      await verify.methods.mediaLogin(this.state.mediaAddr).send({ from: accounts[0] });
 
-      Router.pushRoute(`/Academic/school/index`);
+      Router.pushRoute(`/dNews/media/Certificate`);
     } catch (err) {
       this.setState({ errorMessage: err.message });
     }
 
     this.setState({ loading: false });
-  };
+  }; 
 
   render() {
     return (
@@ -35,12 +35,12 @@ class Login extends Component {
         <br />
         <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
           <Form.Field>
-            <h3>school Entity Address</h3>
+            <h3>Media Entity Address</h3>
             <Input
               placeholder='your entity address (0x...)'
-              value={this.state.schoolAddr}
+              value={this.state.mediaAddr}
               onChange={event =>
-                this.setState({ schoolAddr: event.target.value })}
+                this.setState({ mediaAddr: event.target.value })}
             />
           </Form.Field>
           <a>

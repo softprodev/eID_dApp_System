@@ -1,16 +1,20 @@
 import React, { Component } from 'react';
 import { Button, Form, Input, Message } from 'semantic-ui-react';
 import { Link, Router } from '../../../routes';
-import Layout from '../../../components/Layout';
-import web3 from '../../../ethereum/academic/web3';
-import verify from '../../../ethereum/academic/verify';
-import Entity from '../../../ethereum/eid/build/Entity.json'
+import Layout from '../../../components/Layout_dNews';
+// import web3 from '../../../ethereum/academic/web3';
+//import verify from '../../../ethereum/academic/verify';
+//import Entity from '../../../ethereum/eid/build/Entity.json'
 
 class AddIndex extends Component {
   state = {
     selectedFile: null,
-    newSchoolAddr: '',
-    newSchoolName: '',
+    newJourName: '',
+    newJourAddr: '',
+    newMediaName:'',
+    newMediaAddr:'',
+    department:'',
+    duedate:'',
     errorMessage: '',
     loading: false
   };
@@ -28,7 +32,7 @@ class AddIndex extends Component {
       const entityMinistry = new web3.eth.Contract(Entity.abi, '0xD884A1f1CCF5968C27B7054f560bfC588C8e37F0');
       console.log(entityMinistry);
       await entityMinistry.methods
-        .newDataToSend(this.state.newSchoolAddr, "schoolCertificate")
+        .newDataToSend(this.state.newMediaAddr, "schoolCertificate")
         .send({ from: accounts[0] });
       
       const index = await entityMinistry.methods
@@ -46,10 +50,10 @@ class AddIndex extends Component {
 
       // in Verify
       await verify.methods
-        .addNewSchool(this.state.newSchoolAddr, this.state.newSchoolName)
+        .addNewSchool(this.state.newMediaAddr, this.state.newMediaName)
         .send({ from: accounts[0] });
 
-      Router.pushRoute(`/Academic/ministry/schoolList`);
+      Router.pushRoute(`/dNews/media/jourList`);
     } catch (err) {
       this.setState({ errorMessage: err.message });
     }
@@ -60,35 +64,68 @@ class AddIndex extends Component {
   render() {
     return (
       <Layout>
-        <h1>Add new school</h1>
-        <Link route="/Academic/ministry/schoolList">
+        <h1>Add Qualified Journalist</h1>
+        <Link route="/dNews/media/jourList">
           <a>
             <Button
               floated="right"
-              content='View All Schools'
+              content='View All Qualified Journalists'
               primary={true}
             />
           </a>
         </Link>
         <br />
-        <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
           <Form.Field>
-            <h3>School Entity Address</h3>
+            <h3>Journalist Name</h3>
             <Input
-              placeholder='the school entity address (0x...)'
+              placeholder='the journalist name'
+              value={this.state.newJournalistName}
+              onChange={event =>
+                this.setState({ newJournalistName: event.target.value })}
+              style={{ marginBottom: 10 }}
+            />
+          </Form.Field>
+
+          <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
+          <Form.Field>
+            <h3>Journalist Entity Address</h3>
+            <Input
+              placeholder='the journalist entity address (0x...)'
+              value={this.state.newJournalistAddr}
+              onChange={event =>
+                this.setState({ newJournalistAddr: event.target.value })}
+            />
+          </Form.Field>
+
+          <Form.Field>
+            <h3>Media Name</h3>
+            <Input
+              placeholder='the media name'
+              value={this.state.newMediaName}
+              onChange={event =>
+                this.setState({ newMediaName: event.target.value })}
+              style={{ marginBottom: 10 }}
+            />
+          </Form.Field>
+
+          <Form.Field>
+            <h3>Media Entity Address</h3>
+            <Input
+              placeholder='the media entity address (0x...)'
               value={this.state.newSchoolAddr}
               onChange={event =>
                 this.setState({ newSchoolAddr: event.target.value })}
             />
           </Form.Field>
-          
+
+
           <Form.Field>
-            <h3>School Name</h3>
+            <h3>The Journalist License Due Date</h3>
             <Input
-              placeholder='the school name'
-              value={this.state.newSchoolName}
+              placeholder='due date'
+              value={this.state.duedate}
               onChange={event =>
-                this.setState({ newSchoolName: event.target.value })}
+                this.setState({ duedate: event.target.value })}
               style={{ marginBottom: 10 }}
             />
           </Form.Field>
