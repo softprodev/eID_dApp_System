@@ -5,19 +5,29 @@ import Layout from '../../../components/Layout';
 import web3 from '../../../ethereum/academic/web3';
 import verify from '../../../ethereum/academic/verify';
 import CryptoJS from 'crypto-js';
+import DateTime from 'react-datetime';
 import Entity from '../../../ethereum/academic/build/Entity.json'
 
 class UploadIndex extends Component {
   state = {
     selectedFile: null,
     hashValue: '',
+    IPFShash: '',
+    cert_end_date: '',
+    end_date_string: '',
     studentAddr: '',
     studentName: '',
-    studentEntity: '',
     studentGraduate: '',
+    controlAddr: '',
     errorMessage: '',
     loading: false
   };
+
+  static async getInitialProps(props) {
+    const { address } = props.query;
+
+    return { address };
+  }
 
   onFileChange = event => {
     this.setState({
@@ -28,22 +38,9 @@ class UploadIndex extends Component {
     const curFile = event.target.files[0];
     const reader = new FileReader();
     var that = this;
-    reader.readAsText(curFile);
+    reader.readAsArrayBuffer(curFile);
     reader.onload = function (e) {
-      //console.log('file:', e.target.result);
-      let jsonData = JSON.parse(this.result);
-      //console.log(jsonData.issuers[0].address);
-      that.setState({
-        studentAddr: jsonData.data[0].address,
-        studentName: jsonData.data[0].name
-      });
-      console.log("student's address: ", that.state.studentAddr);
-    };
-    // hash json
-    const reader2 = new FileReader();
-    reader2.readAsArrayBuffer(curFile);
-    reader2.onload = function (e) {
-      var wordArray = CryptoJS.lib.WordArray.create(reader2.result);
+      var wordArray = CryptoJS.lib.WordArray.create(reader.result);
       var hash = CryptoJS.SHA256(wordArray).toString();
       that.setState({ hashValue: hash });
       console.log("hashing value: ", that.state.hashValue);
@@ -63,37 +60,45 @@ class UploadIndex extends Component {
   };
 
   onSubmit = async () => {
-    this.setState({ loading: true, errorMessage: '' });
-    //console.log(this.state.hashValue);
+    this.setState({ 
+      loading: true, 
+      errorMessage: ''
+    });
+    console.log(this.state.cert_end_date);
     try {
       const accounts = await web3.eth.getAccounts();
 
       // in Entity
-      const user = await verify.methods.getUserEntity().call();
-      const entitySchool = await new web3.eth.Contract(Entity.abi, user);
-      await entitySchool.methods
-        .newDataToSend(this.state.studentEntity, "diploma")
+      const access = await new web3.eth.Contract(Entity.abi, this.state.controlAddr);
+      const entitySchool = await new web3.eth.Contract(Entity.abi, this.props.address);
+      
+      await access.methods
+        .newDataMultipleToSend(this.props.address, this.state.studentAddr, "diploma")
         .send({ from: accounts[0] });
 
       const index = await entitySchool.methods
-        .recentSendingIndex(this.state.studentEntity)
+        .recentSendingIndex(this.state.studentAddr)
         .call();
 
-      await entitySchool.methods
-        .addDataToSend("IPFS hash", this.state.hashValue, index)
+      await access.methods
+        .addDataMultipleToSend(this.props.address, "IPFShash", this.state.hashValue, index)
         .send({ from: accounts[0] });
 
-      await entitySchool.methods
-        .addDataToSend("isGraduated", this.state.studentGraduate, index)
+      await access.methods
+        .addDataMultipleToSend(this.props.address, "isGraduated", this.state.studentGraduate, index)
         .send({ from: accounts[0] });
 
-      await entitySchool.methods
-        .approveDataToSend(index)
+      await access.methods
+        .addDataMultipleToSend(this.props.address, "CertificateEndDate", this.state.cert_end_date, index)
+        .send({ from: accounts[0] });
+
+      await access.methods
+        .approveMultipleToSend(this.props.address, index)
         .send({ from: accounts[0] });
 
       // in Verify
       await verify.methods
-      .upload(this.state.hashValue, this.state.studentEntity, 
+      .upload(this.state.hashValue, this.state.studentAddr, 
               this.state.studentName, this.state.studentGraduate)
       .send({ from: accounts[0] });
 
@@ -107,6 +112,7 @@ class UploadIndex extends Component {
   render() {
     return (
       <Layout>
+        {/* <h1 style={{ color: "#e60000" }}>！學校模式：上傳學生畢業！</h1> */}
         <h1>Upload Certificates</h1>
         <Link route="/Academic/school/students">
           <a>
@@ -120,25 +126,50 @@ class UploadIndex extends Component {
         <br />
         <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
           <Form.Field>
+            <h3>Entity to Control</h3>
+            <Input
+              placeholder='your entity address (0x...)'
+              value={this.state.controlAddr}
+              onChange={event =>
+                this.setState({ controlAddr: event.target.value })}
+            />
+          </Form.Field>
+          <Form.Field>
+            <h3>Student Name</h3>
+            <Input
+              placeholder='the student name'
+              value={this.state.studentName}
+              onChange={event =>
+                this.setState({ studentName: event.target.value })}
+            />
+          </Form.Field>
+          <Form.Field>
             <h3>Student Entity Address</h3>
             <Input
               placeholder='the student entity address (0x...)'
-              value={this.state.studentEntity}
+              value={this.state.studentAddr}
               onChange={event =>
-                this.setState({ studentEntity: event.target.value })}
+                this.setState({ studentAddr: event.target.value })}
             />
           </Form.Field>
           <Form.Field>
             <h3>If Student Graduate or not</h3>
             <Input
-              placeholder='yes/no'
+              placeholder='Yes/No'
               value={this.state.studentGraduate}
               onChange={event =>
                 this.setState({ studentGraduate: event.target.value })}
             />
           </Form.Field>
           <Form.Field>
-            <h3>Choose a JSON file</h3>
+            <h3>Student Cerificate End Date</h3>
+            <DateTime
+              value={this.state.vote_start_date} 
+              onChange={date => { this.setState({ cert_end_date: date.toDate().getTime().toString() }); }}>
+            </DateTime>
+          </Form.Field>
+          <Form.Field>
+            <h3>Choose the Transcript</h3>
             <input
               type="file"
               onChange={this.onFileChange}

@@ -18,11 +18,16 @@ class Login extends Component {
     this.setState({ loading: true, errorMessage: '' });
     try {
       const accounts = await web3.eth.getAccounts();
-      await verify.methods.ministryLogin(this.state.ministryAddr).send({ from: accounts[0] });
 
-      Router.pushRoute(`/Academic/ministry/index`);
+      let flag = await verify.methods.ministryLogin(this.state.ministryAddr).call();
+      console.log(flag);
+      if (!flag) throw " Input is not available";
+      
+      if (this.state.ministryAddr != '0x0000000000000000000000000000000000000000')
+        Router.pushRoute(`/Academic/ministry/${ this.state.ministryAddr.toString() }/index`);
+
     } catch (err) {
-      this.setState({ errorMessage: err.message });
+      this.setState({ errorMessage: err });
     }
 
     this.setState({ loading: false });
@@ -31,13 +36,13 @@ class Login extends Component {
   render() {
     return (
       <Layout>
-        <h1>Login your Entity</h1>
+        <h1>Get into your Entity</h1>
         <br />
         <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
           <Form.Field>
             <h3>Ministry of Education Entity Address</h3>
             <Input
-              placeholder='your entity address (0x...)'
+              placeholder='ministry entity address (0x...)'
               value={this.state.ministryAddr}
               onChange={event =>
                 this.setState({ ministryAddr: event.target.value })}
