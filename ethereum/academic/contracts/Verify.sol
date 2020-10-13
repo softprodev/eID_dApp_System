@@ -16,28 +16,22 @@ contract Verify {
     }
     
     School[] public schools;
-    address public manager;
-    address public ministryEntity = 0x82909e8eC9EC085540bC0c7Ea5f3BA1fD9425Fa6;
+    //Certificate[] public certificates;
+    address public MinistryofEducation;
+    address public ministryEntity = 0x9F54e2c49f5E61711BA6D4263c54b3eD8B25402c;
     
     mapping(address => bool) isSchool;
+    mapping(string => bool) isOnChain;
     mapping(address => mapping(address => Certificate)) public schoolOwnedCert;
     mapping(address => address[]) public schoolOwnedStudent;
     
     constructor() public {
-        manager = msg.sender;
+        MinistryofEducation = msg.sender;
     }
     
-    function stringToUint(string memory s)public pure returns (uint) {
-        bytes memory b = bytes(s);
-        uint i;
-        uint temp = 0;
-        for (i = 0; i < b.length; i++) {
-            uint c = uint(uint8(b[i]));
-            if (c >= 48 && c <= 57) {
-                temp = temp * 10 + (c - 48);
-            }
-        }
-        return temp;
+    modifier restricted_ministry() {
+        require(msg.sender == MinistryofEducation);
+        _;
     }
     
     function addNewSchool(address schoolAddr, string memory schoolName) public {
@@ -46,6 +40,7 @@ contract Verify {
             schoolAddr: schoolAddr
         });
         schools.push(newSchool);
+        isSchool[schoolAddr] = true;
     }
     
     function upload(string memory hashValue, address studentAddr, string memory studentName, string memory graduate) public {
@@ -56,8 +51,19 @@ contract Verify {
             isGraduated: graduate
         });
         
+        //certificates.push(newCert);
+        isOnChain[hashValue] = true;
+        
         schoolOwnedStudent[msg.sender].push(studentAddr);
         schoolOwnedCert[msg.sender][studentAddr] = newCert;
+    }
+    
+    function validation(string memory hashValue) public view returns (bool) {
+        string memory certHash;
+        certHash = hashValue;
+        if (isOnChain[certHash])
+            return true;
+        else return false;
     }
     
     function ministryLogin(address ministryAddr) public view returns (bool) {
@@ -70,8 +76,8 @@ contract Verify {
     
     function verifyIsSchool(address schoolAddr) public view returns (bool) {
         Entity entitySchool = Entity(schoolAddr);
-        string memory text_school = entitySchool.columnValue(ministryEntity, "schoolCertificate", "isSchool");
-        if (keccak256(abi.encodePacked(text_school)) == keccak256(abi.encodePacked("Yes")))
+        string memory text = entitySchool.columnValue(ministryEntity, "schoolCertificate", "isSchool");
+        if (keccak256(abi.encodePacked(text)) == keccak256(abi.encodePacked("Yes")))
             return true;
         else return false;
     }
@@ -84,18 +90,10 @@ contract Verify {
         else return false;
     }
     
-    function expired(address studentAddr, address schoolAddr) public view returns (bool) {
-        Entity entityStudent = Entity(studentAddr);
-        uint time = stringToUint(entityStudent.columnValue(schoolAddr, "diploma", "CertificateEndDate"));
-        if (now * 1000 < time)
-            return true;
-        else return false;
-    }
-    
     function getIPFS(address studentAddr, address schoolAddr) public view returns (string memory){
         Entity entityStudent = Entity(studentAddr);
-        string memory text_IPFS = entityStudent.columnValue(schoolAddr, "diploma", "IPFShash");
-        return text_IPFS;
+        string memory text = entityStudent.columnValue(schoolAddr, "diploma", "IPFS hash");
+        return text;
     }
     
     function getSchoolsCount() public view returns (uint256) {

@@ -36,7 +36,7 @@ class AddIndex extends Component {
       const entityMinistry = new web3.eth.Contract(Entity.abi, this.props.address);
 
       await access.methods
-        .newDataMultipleToSend(this.props.address, this.state.newSchoolAddr, "schoolCertificate")
+        .newDataToSend(this.state.newSchoolAddr, "schoolCertificate")
         .send({ from: accounts[0] });
       
       const index = await entityMinistry.methods
@@ -45,11 +45,11 @@ class AddIndex extends Component {
       //console.log(index);
 
       await access.methods
-        .addDataMultipleToSend(this.props.address, "isSchool", "Yes", index)
+        .addDataToSend("isSchool", "Yes", index)
         .send({ from: accounts[0] });
 
       await access.methods
-        .approveMultipleToSend(this.props.address, index)
+        .approveDataToSend(index)
         .send({ from: accounts[0] });
 
       // in Verify
@@ -67,7 +67,6 @@ class AddIndex extends Component {
   render() {
     return (
       <Layout>
-        <h1 style={{ color: "#e60000" }}>！教育部模式：加入新學校！</h1>
         <h1>Add new school</h1>
         <Link route="/Academic/ministry/schoolList">
           <a>
