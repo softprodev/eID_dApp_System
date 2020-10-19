@@ -18,14 +18,11 @@ class Login extends Component {
     this.setState({ loading: true, errorMessage: '' });
     try {
       const accounts = await web3.eth.getAccounts();
-      let flag = await verify.methods.verifyIsSchool(this.state.schoolAddr).call();
-      if (!flag) throw " The Entity is NOT a Certificated School";
+      await verify.methods.verifyIsSchool(this.state.schoolAddr).send({ from: accounts[0] })
 
-      if(this.state.schoolAddr!='0x0000000000000000000000000000000000000000')
-        Router.pushRoute(`/Academic/school/${this.state.schoolAddr.toString()}/index`);
-
+      Router.pushRoute(`/Academic/school/index`);
     } catch (err) {
-      this.setState({ errorMessage: err });
+      this.setState({ errorMessage: err.message });
     }
 
     this.setState({ loading: false });
@@ -34,13 +31,13 @@ class Login extends Component {
   render() {
     return (
       <Layout>
-        <h1>Get into your Entity</h1>
+        <h1>Login your Entity</h1>
         <br />
         <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage}>
           <Form.Field>
-            <h3>School Entity Address</h3>
+            <h3>school Entity Address</h3>
             <Input
-              placeholder='school entity address (0x...)'
+              placeholder='your entity address (0x...)'
               value={this.state.schoolAddr}
               onChange={event =>
                 this.setState({ schoolAddr: event.target.value })}

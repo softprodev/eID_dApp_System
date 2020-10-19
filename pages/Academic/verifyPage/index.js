@@ -6,13 +6,16 @@ import web3 from '../../../ethereum/academic/web3';
 import verify from '../../../ethereum/academic/verify';
 
 class getIndex extends Component {
-    state = {
-      studentEntity: '',
-      schoolEntity: '',
-      errorMessage: '',
-      loading_verify: false,
-      open: false
-    }
+  state = {
+    selectedFile: null,
+    studentEntity: '',
+    schoolAddress: '',
+    IPFShash: '',
+    errorMessage: '',
+    loading_verify: false,
+    loading_download: false,
+    open: false
+  };
 
   handleCancel = () => this.setState({ open: false });
 
@@ -20,9 +23,9 @@ class getIndex extends Component {
     event.preventDefault();
     this.setState({ open: false, loading_download: true });
     try {
-      const IPFShash = await verify.methods.getIPFS(this.state.studentEntity, this.state.schoolEntity).call();
-      window.open(`https://ipfs.io/ipfs/` + IPFShash);
-
+      const text = await verify.methods.getIPFS(this.state.studentEntity, this.state.schoolAddress).call();
+      this.setState({ IPFShash: text });
+      console.log(this.state.IPFShash);
     } catch (err) {
       this.setState({ errorMessage: err.message });
     }
@@ -35,25 +38,12 @@ class getIndex extends Component {
 
     this.setState({ loading_verify: true, errorMessage: '' });
     try {
-      const accounts = await web3.eth.getAccounts();
-
-      let flag;
-
-      flag = await verify.methods.verifyIsSchool(this.state.schoolEntity).call();
-      console.log(flag);
-      if (!flag) throw "The School is NOT Certificated"
-
-      flag = await verify.methods.existence(this.state.studentEntity, this.state.schoolEntity).call();
-      console.log(flag);
-      if (!flag) throw "The Student is Not Graduated"
-      
-      flag = await verify.methods.expired(this.state.studentEntity, this.state.schoolEntity).call();
-      console.log(flag);
-      if (!flag) throw "The Certificate was Expired"
+      await verify.methods.verifyIsSchool(this.state.schoolAddress).call();
+      await verify.methods.existence(this.state.studentEntity, this.state.schoolAddress).call();
 
       this.setState( { open: true } );
     } catch (err) {
-      this.setState({ errorMessage: err });
+      this.setState({ errorMessage: err.message });
     }
 
     this.setState({ loading_verify: false });
@@ -88,9 +78,9 @@ class getIndex extends Component {
             <h3>School Entity Address</h3>
             <Input
               placeholder='the school entity address (0x...)'
-              value={this.state.schoolEntity}
+              value={this.state.schoolAddress}
               onChange={event =>
-                this.setState({ schoolEntity: event.target.value })}
+                this.setState({ schoolAddress: event.target.value })}
               style={{ marginBottom: 10 }}
             />
           </Form.Field>
@@ -108,11 +98,21 @@ class getIndex extends Component {
             content={`The graduated school of the student is verified!!!
 You can download the student's certificate from IPFS`}
             confirmButton="Get Certificate"
+            loading={this.state.loading_download}
             onCancel={this.handleCancel}
             onConfirm={this.handleConfirm}
           />
           <Message error header="Oops!" content={this.state.errorMessage} />
         </Form>
+        {/* <br />
+        <a>
+          <Button
+            loading={this.state.loading_download}
+            content='Get Certificate'
+            icon='cloud download'
+            primary={true}
+          />
+        </a> */}
       </Layout>
     );
   }

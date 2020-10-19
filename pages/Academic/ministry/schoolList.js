@@ -6,8 +6,7 @@ import verify from '../../../ethereum/academic/verify';
 import { Link } from '../../../routes';
 
 class SchoolPage extends Component {
-  static async getInitialProps(props) {
-    const { address } = props.query;
+  static async getInitialProps() {
     const schoolCount = await verify.methods.getSchoolsCount().call();
 
     const schools = await Promise.all(
@@ -18,7 +17,7 @@ class SchoolPage extends Component {
 
     console.log(schools);
 
-    return { schools, address };
+    return { schools };
   }
 
   renderRows() {
@@ -38,7 +37,7 @@ class SchoolPage extends Component {
     return (
       <Layout>
         <h1>All verified schools</h1>
-        <Link route={`/Academic/ministry/${this.props.address}/index`}>
+        <Link route={"/Academic/ministry/index"}>
           <a>back</a>
         </Link>
         <Table>

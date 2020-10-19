@@ -23,7 +23,6 @@ class Index extends Component {
     // 為了讓 `this` 能在 callback 中被使用，這裡的綁定是必要的：
     this.goVote = this.goVote.bind(this);
     this.goAcademic = this.goAcademic.bind(this);
-    this.gdNews = this.godNews.bind(this);
     this.goEid = this.goEid.bind(this);
   }
   async goVote(event) {
@@ -35,9 +34,6 @@ class Index extends Component {
   }
   async goEid(event) {
     Router.pushRoute(`/Eid/index`);
-  }
-  async godNews(event) {
-    Router.pushRoute(`/dNews/index`);
   }
   render() {
     return (
@@ -58,7 +54,7 @@ class Index extends Component {
           </Navbar>
 
           <div style={{ margin: "auto" }}>
-            <h2 style={{ margin: "auto", marginTop: "8%" }}>
+            <h2 style={{ margin: "auto", marginTop: "15%" }}>
               Go to Vote
               <Button
                 variant="outline-info"
@@ -68,7 +64,7 @@ class Index extends Component {
                 Go to Vote
               </Button>
             </h2>
-            <h2 style={{ margin: "auto", marginTop: "10%" }}>
+            <h2 style={{ margin: "auto", marginTop: "15%" }}>
               Go to Academic
               <Button
                 variant="outline-info"
@@ -78,17 +74,7 @@ class Index extends Component {
                 Go to Academic
               </Button>
             </h2>
-            <h2 style={{ margin: "auto", marginTop: "10%" }}>
-              Go to dNews
-              <Button
-                variant="outline-info"
-                style={{ width: '75%', margin: "auto", marginTop: "3%" }}
-                onClick={this.godNews}
-                loading={this.state.loading2.toString()}>
-                Go to dNews
-              </Button>
-            </h2>
-            <h2 style={{ margin: "auto", marginTop: "10%" }}>
+            <h2 style={{ margin: "auto", marginTop: "15%" }}>
               Go to Entity Management
               <Button
                 variant="outline-info"
