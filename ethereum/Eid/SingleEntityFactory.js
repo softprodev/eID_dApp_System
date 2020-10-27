@@ -3,7 +3,7 @@ import SingleEntityFactory from './build/SingleEntityFactory.json';
 
 const instance = new web3.eth.Contract(
     SingleEntityFactory.abi,
-    '0xa53cc92e2E49eEA57869314F04212D41eF9c329d'
+    '0x70Ebf11f96cf26a326956A17221582351df77668'
 );
 
 export default instance;

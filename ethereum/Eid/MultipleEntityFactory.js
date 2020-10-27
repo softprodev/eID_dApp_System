@@ -3,7 +3,7 @@ import MultipleEntityFactory from './build/MultipleEntityFactory.json';
 
 const instance = new web3.eth.Contract(
     MultipleEntityFactory.abi,
-    '0xF917F02695f8266dc6787E7E72FB62BA315143D2'
+    '0x99aaA8e2101b5AF5C3c2Ba317aA1B3534df8eeF9'
 );
 
 export default instance;

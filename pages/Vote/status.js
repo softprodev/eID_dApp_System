@@ -60,8 +60,6 @@ class Status extends Component {
         const option_length = await Vote_event.methods.options_num().call();
         //console.log(option_length);
         const result = await Vote_event.methods.return_result().call();
-        
-        const question = await Vote_event.methods.vote_question().call();
         //console.log(result);
         //console.log(Vote_event);
         let voter_list = await Vote_event.methods.return_msgsender_voter_list().call();
@@ -89,7 +87,7 @@ class Status extends Component {
             options.push(arr);
         }
         //if(stage==4)
-            return{address,mb_addr,stage,result,options,stage_str,voter_list,winner,time,vst,vet,question};
+            return{address,mb_addr,stage,result,options,stage_str,voter_list,winner,time,vst,vet};
         //else 
         //    return{address,mb_addr,stage,result,options,stage_str,voter_list,time};
     }
@@ -171,7 +169,6 @@ class Status extends Component {
             <Card.Body>
                 <Card.Title>Voting Illustration</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">Vote address : {this.props.address}</Card.Subtitle>
-                <Card.Subtitle className="mb-2 text-muted">Vote question : {this.props.question}</Card.Subtitle>
                 <Card.Subtitle className="mb-2 text-muted">{this.props.stage_str}</Card.Subtitle>
                 
                 <Table responsive style={{'height': '200px',"width":"100%", 'overflowY':'scroll', 'display': 'block'}}>
