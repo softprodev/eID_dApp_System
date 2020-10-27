@@ -4,8 +4,8 @@ import { Link, Router } from '../../../routes';
 import Layout from '../../../components/Layout';
 import web3 from '../../../ethereum/academic/web3';
 import verify from '../../../ethereum/academic/verify';
-import DateTime from 'react-datetime';
 import Entity from '../../../ethereum/academic/build/Entity.json'
+import DateTime from 'react-datetime';
 const ipfsClient = require('ipfs-http-client')
 
 const typeOfCertificate = [
@@ -28,8 +28,8 @@ class UploadIndex extends Component {
     return { address };
   }
 
-  constructor () {
-    super()
+  constructor (props) {
+    super(props)
     this.state = {
       ipfs: ipfsClient("/ip4/127.0.0.1/tcp/5001"),
       IPFShash: '',
@@ -91,37 +91,18 @@ class UploadIndex extends Component {
       loading: true, 
       errorMessage: ''
     });
-    console.log(this.state.IPFShash);
-    console.log(this.state.cert_end_date);
+    console.log(this.state.IPFShash + "," + this.state.studentGraduate + "," + this.state.cert_end_date);
     try {
       const accounts = await web3.eth.getAccounts();
 
       // in Entity
       const access = await new web3.eth.Contract(Entity.abi, this.state.controlAddr);
-      const entitySchool = await new web3.eth.Contract(Entity.abi, this.props.address);
-      
-      await access.methods
-        .newDataMultipleToSend(this.props.address, this.state.studentAddr, "diploma")
-        .send({ from: accounts[0] });
-
-      const index = await entitySchool.methods
-        .recentSendingIndex(this.state.studentAddr)
-        .call();
+      //const entitySchool = await new web3.eth.Contract(Entity.abi, this.props.address);
 
       await access.methods
-        .addDataMultipleToSend(this.props.address, "IPFShash", this.state.IPFShash, index)
-        .send({ from: accounts[0] });
-
-      await access.methods
-        .addDataMultipleToSend(this.props.address, "isGraduated", this.state.studentGraduate, index)
-        .send({ from: accounts[0] });
-
-      await access.methods
-        .addDataMultipleToSend(this.props.address, "CertificateEndDate", this.state.cert_end_date, index)
-        .send({ from: accounts[0] });
-
-      await access.methods
-        .approveMultipleToSend(this.props.address, index)
+        .newDataMultipleToSend(this.props.address, this.state.studentAddr, "diploma", 
+                              "IPFShash,isGraduated,CertificateEndDate",
+                              this.state.IPFShash + "," + this.state.studentGraduate + "," + this.state.cert_end_date, true)
         .send({ from: accounts[0] });
 
       // in Verify
@@ -130,7 +111,7 @@ class UploadIndex extends Component {
               this.state.studentName, this.state.studentGraduate)
       .send({ from: accounts[0] });
 
-      Router.pushRoute(`/Academic/school/students`);
+      Router.pushRoute(`/Academic/school/${this.props.address}/students`);
     } catch (err) {
       this.setState({ errorMessage: err.message });
     }
@@ -142,7 +123,7 @@ class UploadIndex extends Component {
       <Layout>
         <h1 style={{ color: "#e60000" }}>！學校模式：上傳學生畢業證明！</h1>
         <h1>Upload Certificates</h1>
-        <Link route="/Academic/school/students">
+        <Link route={`/Academic/school/${this.props.address}/students`}>
           <a>
             <Button
               floated="right"
