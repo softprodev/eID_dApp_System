@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from 'semantic-ui-react';
 import Head from 'next/head';
-import Header from './EidUserHeader';
+import Header from './SchoolHeader';
 
 export default (props) => {
   return (

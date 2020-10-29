@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Button, Input, Tab, Dropdown, Table } from 'semantic-ui-react';
+import { Form, Button, Input, Message, Dropdown, Table } from 'semantic-ui-react';
 import Layout from '../../../components/EidUserLayout';
 import Entity from '../../../ethereum/Eid/build/Entity.json';
 import web3 from '../../../ethereum/web3';
@@ -28,19 +28,13 @@ class Storage extends Component {
     address: [],
     description: [],
     keys:[],
-    values:[],
-    senderSingle: true,
-    ownerSingle: true,
-    singleEntity: '',
-    markup:''
+    values:[]
   };
 
   static async getInitialProps (props) {
     const {address} = props.query;
     const entity = new web3.eth.Contract(Entity.abi ,address);
     let addrLength = await entity.methods.sourceLength().call();
-    let ownerSingle = await entity.methods.isSingle().call();
-    
 
     let source = [];
     for(let i=0; i<addrLength; i++){
@@ -49,55 +43,47 @@ class Storage extends Component {
     }
 
     console.log(source);
-
-    return {source, address, entity, ownerSingle};
+    return {source, address};
   }
 
+  
 
   handleAddress = async (e, { value }) => {
+    const entity = new web3.eth.Contract(Entity.abi , this.props.address);
     let src = this.props.source[value].text;
-
-    const senderEntity = new web3.eth.Contract(Entity.abi, src);
-    let single = await senderEntity.methods.isSingle().call();
-    this.setState({inputAddress: src, senderSingle: single});
-    let desLength = await this.props.entity.methods.descriptionLength(src).call();
+    this.setState({inputAddress: src});
+    let desLength = await entity.methods.descriptionLength(src).call();
 
     let des = [];
     for(let i=0; i<desLength; i++){
-      let tmp = await this.props.entity.methods.descriptionsBySource(src, i).call();
+      let tmp = await entity.methods.descriptionsBySource(src, i).call();
       des[i] = {key:i, text:tmp, value:i};
     }
     this.setState({description: des});
 
-    console.log(this.props.address, this.state.inputAddress, this.state.description);
-
   }
 
   handleDescription = async (e, { value }) => {
-    let Keys = await this.props.entity.methods.keysOfData(this.state.inputAddress, this.state.description[value].text).call();
+    const entity = new web3.eth.Contract(Entity.abi ,this.props.address);
+    
+
+    let Keys = await entity.methods.keysOfData(this.state.inputAddress, this.state.description[value].text).call();
     Keys = Keys.split(", ");
     Keys = Keys.slice(1);
     console.log(Keys);
 
     let Values = [];
     let i;
-    for(i=0; i<Keys.length; i++)
-      Values[i] = await this.props.entity.methods.fetchValue(this.state.inputAddress, this.state.description[value].text, Keys[i]).call();
-  
+    for(i=0; i<Keys.length; i++){
+
+      Values[i] = await entity.methods.fetchValue(this.state.inputAddress, this.state.description[value].text, Keys[i]).call();
+    }
     console.log(Keys);
     console.log(Values);
     this.setState({values: Values});
     this.setState({keys:Keys});
     this.setState({inputDescription: this.state.description[value].text});
 
-  }
-
-  handleOwner = async () => {
-
-  }
-
-  handleSender = async () => {
-    
   }
 
   render() {
@@ -146,57 +132,6 @@ class Storage extends Component {
             </Row>
           </Body>
         </Table>
-        <Tab 
-          menu={{ fluid: true, vertical: true, tabular: true }} 
-          panes={
-            [
-              {
-                menuItem: 'Owner',
-                pane: (
-                  <Tab.Pane key='tab1'>
-                    <Form>
-                      {this.props.ownerSingle ? <></> :
-                        <Form.Field>
-                          <label>Entity has access to Multiple Entity</label>
-                          <Input placeholder="Single Entity" onChange={(e)=>{this.setState({singleEntity: e.target.value})}}/>
-                        </Form.Field>
-                      }
-                      <Form.Field>
-                        <label>Markup</label>
-                        <Input placeholder="Markup" onChange={(e)=>{this.setState({markup: e.target.value})}}/>
-                      </Form.Field>
-                      <Button 
-                        onClick={this.handleOwner}
-                      />
-                    </Form>
-                  </Tab.Pane>
-                )
-              },
-              {
-                menuItem: 'Sender',
-                pane: (
-                  <Tab.Pane key='tab2'>
-                    <Form>
-                      {this.state.senderSingle ? <></> :
-                        <Form.Field>
-                          <label>Entity has access to Multiple Entity</label>
-                          <Input placeholder="Single Entity" onChange={(e)=>{this.setState({singleEntity: e.target.value})}}/>
-                        </Form.Field>
-                      }
-                      <Form.Field>
-                        <label>Markup</label>
-                        <Input placeholder="Markup" onChange={(e)=>{this.setState({markup: e.target.value})}}/>
-                      </Form.Field>
-                      <Button 
-                        onClick={this.handleSender}
-                      />
-                    </Form>
-                  </Tab.Pane>
-                )
-              }
-            ]
-          } 
-        />
       </Layout>
     );
   }
