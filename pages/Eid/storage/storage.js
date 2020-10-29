@@ -90,18 +90,67 @@ class Storage extends Component {
       Values[i] = await entity.methods.fetchValue(this.state.inputAddress, this.state.description[value].text, Keys[i]).call();
   
     //TODO: fetch markup data
-    
+    let markupOwner = await entity.methods.MarkupsOwner(this.state.inputAddress, this.state.description[value].text).call();
+    let markupSender = await entity.methods.MarkupsSender(this.state.inputAddress, this.state.description[value].text).call();
 
-    this.setState({keys:Keys, values: Values, inputDescription: this.state.description[value].text});
+    this.setState({keys:Keys, 
+      values: Values, 
+      inputDescription: this.state.description[value].text, 
+      markupSender: markupSender,
+      markupOwner: markupOwner
+    });
 
   }
 
   handleOwner = async () => {
+    let entity;
+
+    try{
+      this.setState({loading: true});
+      const accounts = await web3.eth.getAccounts();
+      if(this.state.ownerSingle){
+        entity = new web3.eth.Contract(Entity.abi, this.props.address);
+        await entity.methods.markupSelf(this.state.inputAddress, this.state.inputDescription, this.state.markup)
+        .send({from: accounts[0]});
+      }
+      else{
+        entity = new web3.eth.Contract(Entity.abi, this.state.singleEntity);
+        await entity.methods.markupMultiple(this.props.address, this.props.address, this.state.inputAddress, this.state.inputDescription, this.state.markup, true)
+        .send({from: accounts[0]});
+
+      }
+      window.location.reload(false);
+      this.setState({loading: false});
+    } catch (err) {
+      //this.setState({ errorMessage: err.message });
+    }
 
   }
 
   handleSender = async () => {
-    
+    let entity;
+
+    try{
+      this.setState({loading: true});
+      const accounts = await web3.eth.getAccounts();
+      if(this.state.senderSingle){
+        entity = new web3.eth.Contract(Entity.abi, this.state.inputAddress);
+        await entity.methods.markup(this.props.address, this.state.inputDescription, this.state.markup)
+        .send({from: accounts[0]});
+
+      }
+      else{
+        entity = new web3.eth.Contract(Entity.abi, this.state.singleEntity);
+        await entity.methods.markupMultiple(this.state.inputAddress, this.props.address, this.props.address, this.state.inputDescription, this.state.markup, false)
+        .send({from: accounts[0]});
+
+      }
+      window.location.reload(false);
+      this.setState({loading: false});
+    } catch (err) {
+      //this.setState({ errorMessage: err.message });
+    }
+
   }
 
   render() {
@@ -168,7 +217,7 @@ class Storage extends Component {
                 Owner
               </Table.Cell>
               <Table.Cell>
-                content
+                {this.state.markupOwner}
               </Table.Cell>
             </Row>
             <Row>
@@ -176,7 +225,7 @@ class Storage extends Component {
                 Sender
               </Table.Cell>
               <Table.Cell>
-                content
+                {this.state.markupSender}
               </Table.Cell>
             </Row>
           </Body>
@@ -202,6 +251,9 @@ class Storage extends Component {
                       </Form.Field>
                       <Button 
                         onClick={this.handleOwner}
+                        primary
+                        loading={this.state.loading}
+                        content="Send"
                       />
                     </Form>
                   </Tab.Pane>
@@ -224,6 +276,9 @@ class Storage extends Component {
                       </Form.Field>
                       <Button 
                         onClick={this.handleSender}
+                        primary
+                        loading={this.state.loading}
+                        content="Send"
                       />
                     </Form>
                   </Tab.Pane>
