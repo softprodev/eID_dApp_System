@@ -1,64 +1,98 @@
 import React, { Component } from 'react';
-import { Button, Form, Message, Input } from 'semantic-ui-react';
+import { Button, Form, Message, Input, Dropdown } from 'semantic-ui-react';
 import { Link, Router } from '../../../routes';
 import Layout from '../../../components/Layout';
 import web3 from '../../../ethereum/academic/web3';
 import verify from '../../../ethereum/academic/verify';
-import CryptoJS from 'crypto-js';
+import DateTime from 'react-datetime';
 import Entity from '../../../ethereum/academic/build/Entity.json'
+const ipfsClient = require('ipfs-http-client')
+
+const typeOfCertificate = [
+  {
+    key: 0,
+    text: 'Will Expire',
+    value: 0
+  },
+  {
+    key: 1,
+    text: 'Will NOT Expire',
+    value: 1
+  }
+]
 
 class UploadIndex extends Component {
-  state = {
-    selectedFile: null,
-    hashValue: '',
-    IPFShash: '',
-    studentAddr: '',
-    studentName: '',
-    studentGraduate: '',
-    controlAddr: '',
-    errorMessage: '',
-    loading: false
-  };
-
   static async getInitialProps(props) {
     const { address } = props.query;
 
     return { address };
   }
 
-  onFileChange = event => {
-    this.setState({
-      selectedFile: event.target.files[0],
-      errorMessage: ''
-    });
-
-    const curFile = event.target.files[0];
-    const reader = new FileReader();
-    var that = this;
-    reader.readAsArrayBuffer(curFile);
-    reader.onload = function (e) {
-      var wordArray = CryptoJS.lib.WordArray.create(reader.result);
-      var hash = CryptoJS.SHA256(wordArray).toString();
-      that.setState({ hashValue: hash });
-      console.log("hashing value: ", that.state.hashValue);
-    };
-  };
-
-  fileData = () => {
-    if (this.state.selectedFile) {
-      return (
-        <div>
-          <h2>File Details:</h2>
-          <p>File Name: {this.state.selectedFile.name}</p>
-          <p>File Type: {this.state.selectedFile.type}</p>
-        </div>
-      );
+  constructor () {
+    super()
+    this.state = {
+      ipfs: ipfsClient("/ip4/127.0.0.1/tcp/5001"),
+      IPFShash: '',
+      cert_end_date: '10000000000000',
+      disable: true,
+      studentAddr: '',
+      studentName: '',
+      studentGraduate: '',
+      controlAddr: '',
+      errorMessage: '',
+      loading: false
     }
-  };
+
+    // bind methods
+    this.captureFile = this.captureFile.bind(this)
+    this.saveToIpfs = this.saveToIpfs.bind(this)
+    this.connect = this.connect.bind(this)
+  }
+
+  captureFile (event) {
+    event.stopPropagation()
+    event.preventDefault()
+  
+    this.saveToIpfs(event.target.files)
+  }
+
+  // Add file to IPFS and return a CID
+  async saveToIpfs ([ file ]) {
+    try {
+      const added = await this.state.ipfs.add(
+        file,
+        {
+          progress: (prog) => console.log(`received: ${prog}`)
+        }
+      )
+      this.setState({ IPFShash: added.cid.toString() })
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  connect () {
+    this.setState({
+      ipfs: ipfsClient("/ip4/127.0.0.1/tcp/5001")
+    })
+  }
+
+  handleChange = (e, { value }) => {
+    if (value == 0) this.setState({ disable: false });
+    else if (value == 1) 
+      this.setState({ 
+        disable: true,
+        cert_end_date: '10000000000000'
+      });
+  }
 
   onSubmit = async () => {
-    this.setState({ loading: true, errorMessage: '' });
-    
+    this.setState({ 
+      loading: true, 
+      errorMessage: ''
+    });
+    console.log(this.state.IPFShash);
+    console.log(this.state.cert_end_date);
     try {
       const accounts = await web3.eth.getAccounts();
 
@@ -75,11 +109,15 @@ class UploadIndex extends Component {
         .call();
 
       await access.methods
-        .addDataMultipleToSend(this.props.address, "IPFS hash", this.state.hashValue, index)
+        .addDataMultipleToSend(this.props.address, "IPFShash", this.state.IPFShash, index)
         .send({ from: accounts[0] });
 
       await access.methods
         .addDataMultipleToSend(this.props.address, "isGraduated", this.state.studentGraduate, index)
+        .send({ from: accounts[0] });
+
+      await access.methods
+        .addDataMultipleToSend(this.props.address, "CertificateEndDate", this.state.cert_end_date, index)
         .send({ from: accounts[0] });
 
       await access.methods
@@ -102,6 +140,7 @@ class UploadIndex extends Component {
   render() {
     return (
       <Layout>
+        <h1 style={{ color: "#e60000" }}>！學校模式：上傳學生畢業證明！</h1>
         <h1>Upload Certificates</h1>
         <Link route="/Academic/school/students">
           <a>
@@ -142,23 +181,40 @@ class UploadIndex extends Component {
             />
           </Form.Field>
           <Form.Field>
-            <h3>If Student Graduate or not</h3>
+            <h3>Student Graduate or not</h3>
             <Input
-              placeholder='yes/no'
+              placeholder='Yes/No'
               value={this.state.studentGraduate}
               onChange={event =>
                 this.setState({ studentGraduate: event.target.value })}
             />
           </Form.Field>
           <Form.Field>
-            <h3>Choose a JSON file</h3>
-            <input
-              type="file"
-              onChange={this.onFileChange}
-              accept="application/json"
-              style={{ marginBottom: 4 }}
-            />
-            {this.fileData()}
+            <h3>Type of Certificate</h3>
+              <Dropdown
+                placeholder='Type of Certificate'
+                options={typeOfCertificate}
+                selection={true}
+                onChange={this.handleChange}
+              />
+          </Form.Field>
+          <Form.Field disabled={!!this.state.disable}>
+            <h3>Student Cerificate Expired Date (if needed)</h3>
+            <DateTime
+              value={this.state.cert_start_date} 
+              onChange={date => {
+                  this.setState({ cert_end_date: date.toDate().getTime().toString() });
+              }}>
+            </DateTime>
+          </Form.Field>
+          <Form.Field>
+            <h3>Choose the Transcript</h3>
+              <input
+                type="file"
+                onChange={this.captureFile}
+                // accept="application/json"
+                style={{ marginBottom: 4 }}
+              />
           </Form.Field>
           <a>
             <Button
@@ -170,6 +226,7 @@ class UploadIndex extends Component {
           </a>
           <Message error header="Oops!" content={this.state.errorMessage} />
         </Form>
+        <br /><br />
       </Layout>
     );
   }

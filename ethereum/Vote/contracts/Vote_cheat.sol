@@ -9,12 +9,24 @@ Latest commit f57eb8d 2 days ago
   */
 pragma solidity >= 0.6.0 < 0.7.0;
 import "./Eid.sol";
-import "./a.sol";
+import "https://github.com/witnet/elliptic-curve-solidity/blob/master/contracts/EllipticCurve.sol";
 
 contract vote{
     ///////////////declaration
-    using ECCMath for *;
-    using Secp256k1 for *;
+    
+      uint256 public constant GX = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798;
+      uint256 public constant GY = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8;
+      uint256 public constant AA = 0;
+      uint256 public constant BB = 7;
+      uint256 public constant PP = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F;
+      
+      uint256 public Vote_sum;
+      uint256 public Vote_sum_ECC_x;
+      uint256 public Vote_sum_ECC_y;
+      
+      uint256 public exponent;
+      uint256 public m;
+      
     address public owner;
     
     string public vote_question;//投票問題
@@ -27,7 +39,7 @@ contract vote{
         address EOA_address;
         address registry_addr;//投票人EOA裡面的Registry Addr
         bool register_or_not;//身分驗證通過沒
-        int vote_value;//投票值
+        uint256 vote_value;//投票值
         int vote_time;//改過幾次了票了
     }
     struct rq{
@@ -35,7 +47,7 @@ contract vote{
         uint rq_type;
     }
     mapping(address=>voter) public eligible_voter_list;
-    address [] public  entity_voter_list;
+    address [] public  msgsender_voter_list;
     
     address public write_entity_addr;//registry的寫入單位應該為誰ex.內政部
     string public description;
@@ -56,7 +68,29 @@ contract vote{
         winner = -1;
         options_num = 0;
         isSet = false;
+        Vote_sum = 0;
+        Vote_sum_ECC_x = GX;
+        Vote_sum_ECC_y = GY;
         //options.push("請輸入選項");
+        
+        options.push("yes");
+        options_num++;
+        result.push(0);
+        options.push("no");
+        options_num++;
+        result.push(0);
+        vote_question = "plz pass";
+        description = "human";
+        times[0] = 0;
+        times[1] = 1;
+        write_entity_addr = setOwner;
+        state = State.VOTE;
+        exponent = 3;
+        m = 2;
+        isSet = true;
+         Vote_sum = 160;
+        
+        (Vote_sum_ECC_x,Vote_sum_ECC_y) = EllipticCurve.ecMul(142,GX,GY,AA,PP);
     }
     /////////////modifier
     modifier isOwner() {
@@ -107,7 +141,7 @@ contract vote{
         requirements_key.push(_key);
     }
     
-    function set_up_all(string memory q ,uint vst,uint vet ,string memory rq_description ,address write_entity)public isOwner{
+    function set_up_all(string memory q ,uint vst,uint vet ,string memory rq_description ,address write_entity,uint256 exp,uint256 M)public isOwner{
         require(!isSet,"Set should have finished");
         vote_question = q;
         description = rq_description;
@@ -115,6 +149,8 @@ contract vote{
         times[1] = vet;
         write_entity_addr = write_entity;
         state = State.VOTE;
+        exponent = exp;
+        m = M;
     }
     function SetFinish()public isOwner{
         require(!isSet,"Set should have finished");
@@ -159,28 +195,43 @@ contract vote{
         return true;
     }
     /////////// VOTE/////投票值/////////投票者
-    function Go_Vote(int v_value,address entity_addr)public checkInVoteStage{
+    //vote_value換成隨機值
+    function Go_Vote(uint256 v_random,uint256 v_value,address entity_addr)public {
         require(isSet,"Set is not Finish");
         //issue 現在mapping中放的entity address應該用查的不該自行輸入，之後要改
         ///////EOA連接EID
         ///////等create entity完成
-   
+        //msg.sender = 0x097F783e11482f5d05753c9619424171E8E8B3f6,0x21E6fe722e6FdF6fFb907A0cA873dDef779E997F,0xC60700B6AF7bacB7b3392d6c3a1bAe1a09a21E50
+        //五位投票者假設的投票內容         [ 1, 9, 9 ]
+        //隨機的五個值                     [ 55, 11, 75 ]
+        //放在區塊鏈上的內容(投票值+隨機值) [ 56, 20, 84 ]
+        //random 總和是需要被隱藏起來的 141
         ///////if EID身分驗證通過
-            require(Validation(entity_addr));
-            eligible_voter_list[entity_addr].register_or_not = true;
+            //require(Validation(entity_addr));
+            eligible_voter_list[msg.sender].register_or_not = true;
         ///////if 第一次身分驗證通過
-            if(eligible_voter_list[entity_addr].vote_time == 0){
-                eligible_voter_list[entity_addr].registry_addr = entity_addr;
-                eligible_voter_list[entity_addr].EOA_address = msg.sender;
-                entity_voter_list.push(entity_addr);
+            if(eligible_voter_list[msg.sender].vote_time == 0){
+                eligible_voter_list[msg.sender].registry_addr = entity_addr;
+                eligible_voter_list[msg.sender].EOA_address = msg.sender;
+                msgsender_voter_list.push(msg.sender);
             }
         //////if 身分驗證通過
-            if(eligible_voter_list[entity_addr].register_or_not){
-                eligible_voter_list[entity_addr].vote_value = v_value;
-                eligible_voter_list[entity_addr].vote_time ++;
+            if(eligible_voter_list[msg.sender].register_or_not){
+                eligible_voter_list[msg.sender].vote_value = v_random;
+                eligible_voter_list[msg.sender].vote_time ++;
             }
+        //////ECC 計算
+        Vote_sum += v_value;
+        uint a;
+        uint b;
+        (a,b) = EllipticCurve.ecMul(v_random,GX,GY,AA,PP); 
+        uint c = Vote_sum_ECC_x;
+        uint d = Vote_sum_ECC_y;
+        (Vote_sum_ECC_x,Vote_sum_ECC_y) = EllipticCurve.ecAdd(a,b,c,d,AA,PP); 
+        
     }
     /////////// TALLY
+    /*
     function compute()public checkInTallyStage{
         require(isSet,"Set is not Finish");
         ///////先將結果投票歸零
@@ -188,8 +239,8 @@ contract vote{
             result[i] = 0;
         }
         ///////將每個投票結果計算
-        for(uint i = 0; i< entity_voter_list.length;i++){
-                address sender = entity_voter_list[i];
+        for(uint i = 0; i< msgsender_voter_list.length;i++){
+                address sender = msgsender_voter_list[i];
                 uint temp = uint(eligible_voter_list[sender].vote_value);
                 result[temp]++ ;   
         }
@@ -201,6 +252,45 @@ contract vote{
         }
         win_option = options[uint(winner)];
     }    
+    */
+    function checkECCMath(uint s)public view returns(bool){
+        uint256 ECC_checked_x;
+        uint256 ECC_checked_y;
+        (ECC_checked_x,ECC_checked_y) = EllipticCurve.ecMul(s+1,GX,GY,AA,PP);
+        if((ECC_checked_x == Vote_sum_ECC_x) && (ECC_checked_y == Vote_sum_ECC_y)){
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    function tally(uint sum)public {
+        require(isSet,"Set is not Finish");
+        
+        uint256 ECC_checked_x;
+        uint256 ECC_checked_y;
+        
+        (ECC_checked_x,ECC_checked_y) = EllipticCurve.ecMul(sum+1,GX,GY,AA,PP);
+        
+        Vote_sum -= sum;
+        
+        
+        require(ECC_checked_x == Vote_sum_ECC_x);
+        require(ECC_checked_y == Vote_sum_ECC_y);
+        
+        //獲得各選項票數
+        for(uint i = options_num-1;i+1>0;i--){
+            result[i] = (int)(Vote_sum/(exponent ** (m*i)));
+            Vote_sum -= (exponent ** (m*i))*uint256(result[i]);
+        }
+        //////比較每個選項各得幾票
+        for(uint i = 0;i<result.length;i++){
+            if(result[i] > winner){
+                winner = int(i);
+            }
+        }
+        win_option = options[uint(winner)];
+    }
     /////////////////////////////////////view function
     function return_result()public view returns(int[] memory){
         return result;
@@ -218,13 +308,13 @@ contract vote{
         return requirements_key.length;
     }
     function return_msgsender_voter_list()public view returns (address [] memory){
-        return entity_voter_list;
+        return msgsender_voter_list;
     }
     function return_voter_register_status(address sender)public view returns(bool){
         //require((state == State.TALLY)||(state == State.FINISH));
         return eligible_voter_list[sender].register_or_not;
     }
-    function return_voter_vote_status(address sender)public view returns(int){
+    function return_voter_vote_status(address sender)public view returns(uint){
         //require((state == State.TALLY)||(state == State.FINISH));
         return eligible_voter_list[sender].vote_value;
     }
@@ -235,11 +325,10 @@ contract Factory{
     mapping (address => vote []) public vote_create_by_myself_list;
     mapping (address => vote []) public vote_can_join_list;
     
-    function create_vote()public{
+    function create_vote()public  payable{
         //new vote and add to list
         vote new_vote =  new vote(msg.sender);
         vote_create_by_myself_list[msg.sender].push(new_vote);
-        voting_pool.push(new_vote);
     }
     
     function add_to_join_list(vote vote_can_join)public{
@@ -252,9 +341,6 @@ contract Factory{
     
     function return_join_list(address sender)public view returns(vote[] memory){
         return vote_can_join_list[sender];
-    }
-    function return_voting_pool()public view returns(vote[] memory){
-        return voting_pool;
     }
 }
 
