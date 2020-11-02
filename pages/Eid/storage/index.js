@@ -11,13 +11,18 @@ class StorageHomePage extends Component {
     }
 
     onSubmit = async (event) => {
-        Router.pushRoute(`/Eid/storage/${this.state.addr.toString()}`);
+        event.preventDefault();
+
+        if(this.state.addr!='0x0000000000000000000000000000000000000000')
+            Router.pushRoute(`/Eid/storage/${this.state.addr.toString()}`);
+    
+        
     };
 
     render() {
         return(
             <Layout>
-                <Form error={!!this.state.errorMessage} >
+                <Form onSubmit={this.onSubmit} error={!!this.state.errorMessage} >
                     <Form.Field>
                         <label>Go to your entity</label>
                         <Input
@@ -31,7 +36,7 @@ class StorageHomePage extends Component {
                     </Form.Field>
 
                     <Message error header="Oops!" content={this.state.errorMessage} />
-                    <Button primary onClick={this.onSubmit}>Go!</Button>
+                    <Button primary>Go!</Button>
                 </Form>
             </Layout>
 

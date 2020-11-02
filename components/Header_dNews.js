@@ -6,18 +6,22 @@ export default () => {
   return (
     <Menu style={{ marginTop: '10px' }}>
       <Menu.Menu position="left">
-        <Link route="/Academic/index">
-          <a className="item">Academic Credential</a>
+        <Link route="/dNews/index">
+          <a className="item">dNews</a>
         </Link>
       </Menu.Menu>
 
-      <Link route="/Academic/school/upload/login">
-        <a className="item">Upload Mode</a>
+      {/* <Link route="/Academic/verifyPage/index">
+        <a className="item">Verify Mode</a>
       </Link>
 
-      <Link route="/Academic/school/cancel/login">
-        <a className="item">Cancel Mode</a>
+      <Link route="/Academic/school/index">
+        <a className="item">School Mode</a>
       </Link>
+
+      <Link route="/Academic/ministry/index">
+        <a className="item">Ministry Mode</a>
+      </Link> */}
 
       <Menu.Menu position="right">
         <Link route="/">

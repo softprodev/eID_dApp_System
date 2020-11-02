@@ -4,7 +4,7 @@ import { Link, Router } from '../../../routes';
 import Layout from '../../../components/Layout';
 import web3 from '../../../ethereum/academic/web3';
 import verify from '../../../ethereum/academic/verify';
-import Entity from '../../../ethereum/academic/build/Entity.json'
+import Entity from '../../../ethereum/eid/build/Entity.json'
 
 class AddIndex extends Component {
   state = {
@@ -13,6 +13,7 @@ class AddIndex extends Component {
     newSchoolName: '',
     errorMessage: '',
     controlAddr: '',
+    ministryAddr: '',
     loading: false
   };
 
@@ -30,11 +31,25 @@ class AddIndex extends Component {
       const accounts = await web3.eth.getAccounts();
 
       // in Entity
-      const access = await new web3.eth.Contract(Entity.abi, this.state.controlAddr);
-      //const entityMinistry = new web3.eth.Contract(Entity.abi, this.props.address);
+      this.setState({ ministryAddr: '0x82909e8eC9EC085540bC0c7Ea5f3BA1fD9425Fa6' }); 
+      const access = await new web3.eth.Contract(Entity.abi, this.state.controlAddr); // ministry 員工
+      const entityMinistry = new web3.eth.Contract(Entity.abi, this.props.address);
 
       await access.methods
-        .newDataMultipleToSend(this.props.address, this.state.newSchoolAddr, "schoolCertificate", "isSchool", "Yes", true)
+        .newDataToSend(this.state.newSchoolAddr, "schoolCertificate")
+        .send({ from: accounts[0] });
+      
+      const index = await entityMinistry.methods
+        .recentSendingIndex(this.state.newSchoolAddr)
+        .call();
+      //console.log(index);
+
+      await access.methods
+        .addDataToSend("isSchool", "Yes", index)
+        .send({ from: accounts[0] });
+
+      await access.methods
+        .approveDataToSend(index)
         .send({ from: accounts[0] });
 
       // in Verify
@@ -42,7 +57,7 @@ class AddIndex extends Component {
         .addNewSchool(this.state.newSchoolAddr, this.state.newSchoolName)
         .send({ from: accounts[0] });
 
-      Router.pushRoute(`/Academic/ministry/${this.props.address}/schoolList`);
+      Router.pushRoute(`/Academic/ministry/schoolList`);
     } catch (err) {
       this.setState({ errorMessage: err.message });
     }
@@ -52,9 +67,8 @@ class AddIndex extends Component {
   render() {
     return (
       <Layout>
-        <h1 style={{ color: "#e60000" }}>！教育部模式：加入新學校！</h1>
         <h1>Add new school</h1>
-        <Link route={`/Academic/ministry/${this.props.address}/schoolList`}>
+        <Link route="/Academic/ministry/schoolList">
           <a>
             <Button
               floated="right"

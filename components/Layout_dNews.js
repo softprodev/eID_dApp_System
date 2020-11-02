@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from 'semantic-ui-react';
 import Head from 'next/head';
-import Header from './SchoolHeader';
+import Header from './Header_dNews';
 
 export default (props) => {
   return (

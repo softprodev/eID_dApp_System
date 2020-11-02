@@ -6,11 +6,9 @@ const buildPath = path.resolve(__dirname, 'build');
 
 fs.removeSync(buildPath);
 
-const stringsPath = path.resolve(__dirname, 'contracts', 'strings.sol')
 const entityPath = path.resolve(__dirname, 'contracts', 'Entity.sol')
 const verifyPath = path.resolve(__dirname, 'contracts', 'Verify.sol')
 
-const stringsSource = fs.readFileSync(stringsPath, 'utf8')
 const entitySource = fs.readFileSync(entityPath, 'utf-8')
 const verifySource = fs.readFileSync(verifyPath, 'utf-8');
 
@@ -22,9 +20,6 @@ var input = {
         'Entity.sol' : {
             content: entitySource
         },
-        'strings.sol' :{
-            content: stringsSource
-        },
         'Verify.sol' : {
             content: verifySource
         }
@@ -34,10 +29,6 @@ var input = {
             '*': {
                 '*': [ '*' ]
             }
-        },
-        optimizer: {
-            enabled: true,
-            runs: 200
         }
     }
 };
