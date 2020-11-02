@@ -2,22 +2,12 @@ pragma solidity >= 0.6;
 
 import "./Entity.sol";
 
-contract MultipleEntity is Entity {
+contract SingleEntity is Entity {
     mapping(address=>bool) public isOwner;
     address[] public owners;
     
     modifier accessGranted override {
         require(isOwner[msg.sender]);
-        _;
-    }
-    
-    modifier multipleControl(uint32 index) override {
-        require(!votedApproveToReceive[msg.sender][index]);
-        votedApproveToReceive[msg.sender][index] = true;
-        approveToReceiveCount[index]++;
-        if(approveToReceiveCount[index]*2 >= owners.length){
-            toReceiveIsConfirmed[index] = true;
-        }
         _;
     }
     
@@ -31,20 +21,11 @@ contract MultipleEntity is Entity {
         _;
     }
     
-    constructor(address[] memory _owners) public {
-        isSingle = false;
-        
-        for(uint32 i=0; i<_owners.length; i++){
-            Entity check = Entity(_owners[i]);
-            require(check.isEntity());
-            isOwner[_owners[i]] = true;
-            owners.push(_owners[i]);
-        }
-        
+    constructor(address owner) public {
+        isSingle = true;
+        isOwner[owner] = true;
+        owners.push(owner);
     }
-    
-    mapping(uint32=>uint32) public approveToReceiveCount;
-    mapping(address=>mapping(uint32=>bool)) votedApproveToReceive;
     
     function addOwner(address owner)
         public

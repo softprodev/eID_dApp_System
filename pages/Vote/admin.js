@@ -33,7 +33,9 @@ class Admin extends Component {
           loading2: false,
           loading3 : false,
           search:'',
-          errorMessage:''
+          errorMessage:'',
+          exponent:3,
+          M:2
         };
       //console.log(props.query.address);//擷取這個網址的url那part的address(from routes??) 
       console.log(props.vst); 
@@ -79,7 +81,7 @@ class Admin extends Component {
 
         const Vote = vote(this.props.address);
 
-        const {vote_start_date,vote_end_date,requirement_description,write_entity_address,question} = this.state;
+        const {vote_start_date,vote_end_date,requirement_description,write_entity_address,question,exponent,M} = this.state;
         
         this.setState({loading:true,errorMessage:''});
         
@@ -90,7 +92,9 @@ class Admin extends Component {
                 vote_start_date.getTime(),
                 vote_end_date.getTime(),
                 requirement_description,
-                write_entity_address
+                write_entity_address,
+                exponent,
+                M
             ).send(
                 {from:accounts[0]}
             );
@@ -224,6 +228,26 @@ class Admin extends Component {
                 </Form.Group>
                     
             </Form.Row>
+            <Form.Row>
+            <Form.Group controlId="exponent">
+                <Form.Label>exponent</Form.Label> 
+                <Form.Control type="text" placeholder="Enter a number for tally" 
+                    value={this.state.exponent} 
+                    onChange = {event => this.setState({exponent:event.target.value})} 
+                />
+                </Form.Group>
+                    
+            </Form.Row>
+            <Form.Row>
+            <Form.Group controlId="M">
+                <Form.Label>M</Form.Label>
+                <Form.Control type="text" placeholder="Enter a number for tally" 
+                    value={this.state.M} 
+                    onChange = {event => this.setState({M:event.target.value})} 
+                />
+                </Form.Group>
+                    
+            </Form.Row>
 
             <Button variant="primary" type="submit">
             {(this.state.loading)?
@@ -256,16 +280,17 @@ class Admin extends Component {
                                 <td><h5>type</h5></td>
                             </tr>
                         </thead>
-                                {this.props.requirements.map((requirement, index) =>
                                 <tbody style={{width: '200px'}}>
-                                <tr> 
+                                    {this.props.requirements.map((requirement, index) =>
+                                <tr key={index}> 
                                     <td>{index+1}</td>
                                     <td>{requirement[0]}</td>
                                     <td>{requirement[1]}</td>
                                     <td>{requirement[2]}</td>
                                 </tr>
-                                </tbody>
+                                
                                 )}
+                                </tbody>
                         
                     </Table>
                     <Form.Label>vote requirement key</Form.Label>
@@ -316,15 +341,16 @@ class Admin extends Component {
                                 <td><h5>current option</h5></td>
                             </tr>
                         </thead>
-                        
+                            <tbody style={{width: '200px'}}>
                                 {this.props.options.map((option, index) =>
-                                <tbody style={{width: '200px'}}>
-                                <tr> 
+                                
+                                <tr key={index}> 
                                     <td>{index+1}</td>
                                     <td>{option}</td>
                                 </tr>
-                                </tbody>
+                                
                                 )}
+                            </tbody>
                         
                     </Table>
                     
