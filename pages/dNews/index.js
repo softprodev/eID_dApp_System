@@ -26,13 +26,22 @@ class Index extends Component {
     Router.pushRoute(`/dNews/ReadingPage/newsList`);
   }
   async goJour(event) {
-      Router.pushRoute(`dNews/jornalist/LoginPage`);
+      Router.pushRoute(`/dNews/journalist/LoginPage`);
   }
   async goMedia(event) {
     Router.pushRoute(`/dNews/media/LoginPage`);
   }
   async goNcc(event) {
     Router.pushRoute(`/dNews/ncc/LoginPage`);
+  }
+  async goEditor(event) {
+    Router.pushRoute(`/dNews/journalist/editor/LoginPage`);
+  }
+  async goOwner(event) {
+    Router.pushRoute(`/dNews/journalist/owner/LoginPage`);
+  }
+  async childshow(){
+    Router.pushRoute(`/dNews/journalist/owner/QueryChildShow`);
   }
   render() {
     return (
@@ -94,6 +103,58 @@ class Index extends Component {
                 Go to Read News
               </Button>
             </h2>
+            <h2 style={{ margin: "auto", marginTop: "10%" }}>
+              Child Show 
+              <br></br>
+              <Button
+                variant="outline-info"
+                style={{ width: '75%', margin: "auto", marginTop: "3%" }}
+                onClick={this.childshow}>
+                Child Show
+              </Button>
+            </h2>
+            <h2 style={{ margin: "auto", marginTop: "10%" }}>
+              Go to Reading
+              <Button
+                variant="outline-info"
+                style={{ width: '75%', margin: "auto", marginTop: "3%" }}
+                onClick={this.goReading}>
+                Go to Reading
+              </Button>
+            </h2>
+
+            <h2 style={{ margin: "auto", marginTop: "10%" }}>
+              Go to Jour
+              <br />
+              <Button
+                variant="outline-info"
+                style={{ width: '75%', margin: "auto", marginTop: "3%" }}
+                onClick={this.goJour}>
+                Go to Jour
+              </Button>
+            </h2>
+
+            <h2 style={{ margin: "auto", marginTop: "10%" }}>
+              Go to Media
+              <Button
+                variant="outline-info"
+                style={{ width: '75%', margin: "auto", marginTop: "3%" }}
+                onClick={this.goMedia}>
+                Go to Media
+              </Button>
+            </h2>
+
+            <h2 style={{ margin: "auto", marginTop: "10%" }}>
+              Go to Ncc
+              <br />
+              <Button
+                variant="outline-info"
+                style={{ width: '75%', margin: "auto", marginTop: "3%" }}
+                onClick={this.goNcc}>
+                Go to Ncc
+              </Button>
+            </h2>
+            <br /><br />
           </div>
         </Container>
       </>
